@@ -24,6 +24,9 @@ module "hello-lambda-function" {
     OTEL_METRICS_EXPORTER       = "logging"
     OTEL_LOG_LEVEL              = "DEBUG"
     OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4318/"
+    OPENTELEMETRY_COLLECTOR_CONFIG_FILE = "/var/task/config.yaml"
+    SQS_URL = module.sqs.sqs_id
+    DYNAMODB_TABLE_NAME=module.dynamodb.dynamodb_id
   }
 
   tracing_mode = var.tracing_mode
@@ -33,7 +36,38 @@ module "hello-lambda-function" {
     s3 = {
       effect = "Allow"
       actions = [
-        "s3:ListAllMyBuckets"
+        "s3:ListAllMyBuckets",
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords",
+        "xray:GetSamplingRules",
+        "xray:GetSamplingTargets",
+        "xray:GetSamplingStatisticSummaries",
+        "dynamodb:List*",
+        "dynamodb:DescribeReservedCapacity*",
+        "dynamodb:DescribeLimits",
+        "dynamodb:DescribeTimeToLive",
+        "dynamodb:BatchGet*",
+        "dynamodb:DescribeStream",
+        "dynamodb:DescribeTable",
+        "dynamodb:Get*",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchWrite*",
+        "dynamodb:CreateTable",
+        "dynamodb:Delete*",
+        "dynamodb:Update*",
+        "dynamodb:PutItem",
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:ListStreams",
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:SendMessage"
       ]
       resources = [
         "*"
@@ -51,3 +85,15 @@ module "api-gateway" {
   enable_xray_tracing = var.tracing_mode == "Active"
 }
 
+module "dynamodb" {
+  source = "../../../../../utils/terraform/dynamodb"
+
+  name = var.name
+}
+
+module "sqs" {
+  source = "../../../../../utils/terraform/sqs"
+
+  name = var.name
+  lambda_function_name = module.hello-lambda-function.lambda_function_name
+}

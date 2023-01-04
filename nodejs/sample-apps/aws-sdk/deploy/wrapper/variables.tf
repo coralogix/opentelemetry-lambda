@@ -1,6 +1,6 @@
 variable "name" {
   type        = string
-  description = "Name of created function and API Gateway"
+  description = "Name of created function, table, queue and API Gateway"
   default     = "hello-nodejs-awssdk"
 }
 
@@ -19,7 +19,7 @@ variable "sdk_layer_arn" {
 variable "tracing_mode" {
   type        = string
   description = "Lambda function tracing mode"
-  default     = "PassThrough"
+  default     = "Active"
 }
 
 variable "architecture" {

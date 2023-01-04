@@ -11,3 +11,5 @@ terraform.*
 .vscode/
 
 .DS_Store
+
+config.yaml
