@@ -30,7 +30,7 @@
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.34.0",
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.34.0",
     "@opentelemetry/instrumentation": "^0.34.0",
-    "@coralogix/instrumentation-aws-lambda": "0.34.2-SNAPSHOT",
+    "@coralogix/instrumentation-aws-lambda": "file:../../../../opentelemetry-js-contrib-cx/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-0.34.3-SNAPSHOT-rafal.tgz",
     "@opentelemetry/instrumentation-aws-sdk": "^0.10.0",
     "@opentelemetry/instrumentation-dns": "^0.31.0",
     "@opentelemetry/instrumentation-express": "^0.32.0",

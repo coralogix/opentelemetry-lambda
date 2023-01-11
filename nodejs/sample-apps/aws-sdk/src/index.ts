@@ -1,5 +1,4 @@
 import {
-  APIGatewayProxyEvent,
   APIGatewayProxyResult,
   Context,
 } from 'aws-lambda';
@@ -17,8 +16,11 @@ var params = {
   }
 };
 
-exports.handler = async (event: APIGatewayProxyEvent, context: Context) => {
+exports.handler = async (event: any, context: Context) => {
   console.info('Serving lambda request.');
+  console.log(`Event: ${JSON.stringify(event, null, 2)}`);
+  console.log(`Context: ${JSON.stringify(context, null, 2)}`);
+
 
   docClient.put(params, function (err, data) {
     if (err) {
