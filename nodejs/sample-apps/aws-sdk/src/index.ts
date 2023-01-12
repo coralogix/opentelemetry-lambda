@@ -27,6 +27,7 @@ const command = new InvokeCommand({
 
 exports.handler = async (event: APIGatewayProxyEvent, context: Context) => {
   console.info('Serving lambda request.');
+  console.log(`Event: ${JSON.stringify(event, null, 2)}`);
   console.log(`Context: ${JSON.stringify(context, null, 2)}`);
 
   // docClient.put(params, function (err, data) {
