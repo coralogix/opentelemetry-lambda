@@ -6,37 +6,22 @@ import {
 import AWS from 'aws-sdk';
 //import fetch from 'node-fetch';
 
-const s3 = new AWS.S3();
-var docClient = new AWS.DynamoDB.DocumentClient();
-var params = {
-  TableName: "test",
-  Item: {
-    "id": "1",
-    "hello": "hey"
-  }
-};
+const sqs = new AWS.SQS();
 
 exports.handler = async (event: any, context: Context) => {
   console.info('Serving lambda request.');
   console.log(`Event: ${JSON.stringify(event, null, 2)}`);
   console.log(`Context: ${JSON.stringify(context, null, 2)}`);
 
-
-  docClient.put(params, function (err, data) {
-    if (err) {
-      console.error("Unable to put", JSON.stringify(err, null, 2));
-    } else {
-      console.log("put succeeded:");
-    }
-  });
-
-  //const responseOne = await fetch('https://google.com/123');
-  //console.log(await responseOne.json())
-  const result = await s3.listBuckets().promise();
+  const sqsUrl = process.env.SQS_URL as string
+  await sqs.sendMessage({
+    MessageBody: JSON.stringify({ aaa: "aaa" }),
+    QueueUrl: sqsUrl,
+  }).promise(); 
 
   const response: APIGatewayProxyResult = {
     statusCode: 200,
-    body: `Hello lambda - found ${result.Buckets?.length || 0} buckets`,
+    body: `Hello lambda`,
   };
   return response;
 };
