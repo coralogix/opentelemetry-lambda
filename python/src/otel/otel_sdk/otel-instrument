@@ -141,7 +141,6 @@ else
     export OTEL_RESOURCE_ATTRIBUTES="$LAMBDA_RESOURCE_ATTRIBUTES,$OTEL_RESOURCE_ATTRIBUTES";
 fi
 
-
 # - Uses the default `OTEL_PROPAGATORS` which is set to `tracecontext,baggage`
 
 # - Use a wrapper because AWS Lambda's `python3 /var/runtime/bootstrap.py` will

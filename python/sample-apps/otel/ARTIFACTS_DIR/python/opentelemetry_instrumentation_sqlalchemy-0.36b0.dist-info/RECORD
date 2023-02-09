@@ -1,0 +1,15 @@
+opentelemetry/instrumentation/sqlalchemy/__init__.py,sha256=huewjp61nf1kDwOwai1emQJvqqZ9IwC8ZHFA3US5vqo,6137
+opentelemetry/instrumentation/sqlalchemy/__pycache__/__init__.cpython-310.pyc,,
+opentelemetry/instrumentation/sqlalchemy/__pycache__/engine.cpython-310.pyc,,
+opentelemetry/instrumentation/sqlalchemy/__pycache__/package.cpython-310.pyc,,
+opentelemetry/instrumentation/sqlalchemy/__pycache__/version.cpython-310.pyc,,
+opentelemetry/instrumentation/sqlalchemy/engine.py,sha256=p770f3KbVX91KgEcKq12wQtTUV9rbBGW9QVuhWuJwwk,8379
+opentelemetry/instrumentation/sqlalchemy/package.py,sha256=4BoFD2ZDTXLsB3Q8nJ3lErd6ur_IxsIGPPIEhZaaQMk,689
+opentelemetry/instrumentation/sqlalchemy/version.py,sha256=L1GyyH9aX4auAX7oREcQi0ZYu_Pv_dkqR3WiACtblqQ,608
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/METADATA,sha256=3WyAMJ6Nf17WJiDimFFUX1y1AZGvey8FzYVN4YSwJvQ,2249
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/RECORD,,
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/WHEEL,sha256=NaLmgHHW_f9jTvv_wRh9vcK7c7EK9o5fwsIXMOzoGgM,87
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/entry_points.txt,sha256=4IKd6VtyieuoCb_AQ5ASPxjh_5H-KX1Eudq36F4Egs4,106
+opentelemetry_instrumentation_sqlalchemy-0.36b0.dist-info/licenses/LICENSE,sha256=h8jwqxShIeVkc8vOo9ynxGYW16f4fVPxLhZKZs0H5U8,11350

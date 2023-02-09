@@ -1,0 +1,13 @@
+opentelemetry/instrumentation/asyncpg/__init__.py,sha256=cnah3hM3r1rwbWuUhsitXPEYQizaQF8xHgdkpqGNYDA,5726
+opentelemetry/instrumentation/asyncpg/__pycache__/__init__.cpython-310.pyc,,
+opentelemetry/instrumentation/asyncpg/__pycache__/package.cpython-310.pyc,,
+opentelemetry/instrumentation/asyncpg/__pycache__/version.cpython-310.pyc,,
+opentelemetry/instrumentation/asyncpg/package.py,sha256=mOep-M6qrKV8yGSdtUcQzY81Do1qCavJ1hVjwteeaCo,624
+opentelemetry/instrumentation/asyncpg/version.py,sha256=L1GyyH9aX4auAX7oREcQi0ZYu_Pv_dkqR3WiACtblqQ,608
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/METADATA,sha256=S_CpTy5_l6OJ5BsdFYe8aGj44bB0fIGEoH-eA06v14U,2145
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/RECORD,,
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/WHEEL,sha256=NaLmgHHW_f9jTvv_wRh9vcK7c7EK9o5fwsIXMOzoGgM,87
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/entry_points.txt,sha256=CTDCZ8sJ6Zv29m-OF_Guiwz-0hmaP9rzYgevApvuNcA,97
+opentelemetry_instrumentation_asyncpg-0.36b0.dist-info/licenses/LICENSE,sha256=h8jwqxShIeVkc8vOo9ynxGYW16f4fVPxLhZKZs0H5U8,11350

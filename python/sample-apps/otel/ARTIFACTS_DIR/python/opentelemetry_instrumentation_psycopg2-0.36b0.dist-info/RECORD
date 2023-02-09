@@ -1,0 +1,13 @@
+opentelemetry/instrumentation/psycopg2/__init__.py,sha256=sZmBJs5F6RmSprpTGdCcnIuCMJxRPRoMT1PRKFpfPq0,8374
+opentelemetry/instrumentation/psycopg2/__pycache__/__init__.cpython-310.pyc,,
+opentelemetry/instrumentation/psycopg2/__pycache__/package.cpython-310.pyc,,
+opentelemetry/instrumentation/psycopg2/__pycache__/version.cpython-310.pyc,,
+opentelemetry/instrumentation/psycopg2/package.py,sha256=CuxrkA1jDX9JPrcgu2oREkKRzqvXyWRL0aOV1hqbzYI,626
+opentelemetry/instrumentation/psycopg2/version.py,sha256=L1GyyH9aX4auAX7oREcQi0ZYu_Pv_dkqR3WiACtblqQ,608
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/METADATA,sha256=TWadIEKSG1v-Nf7ZJD4L2bkSTBF1kmQZcZmJWgrsHxs,2024
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/RECORD,,
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/WHEEL,sha256=NaLmgHHW_f9jTvv_wRh9vcK7c7EK9o5fwsIXMOzoGgM,87
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/entry_points.txt,sha256=663J31VPQxWkDHGWli5NwmcuP3aXteF_WCLcWFCfcR0,100
+opentelemetry_instrumentation_psycopg2-0.36b0.dist-info/licenses/LICENSE,sha256=h8jwqxShIeVkc8vOo9ynxGYW16f4fVPxLhZKZs0H5U8,11350

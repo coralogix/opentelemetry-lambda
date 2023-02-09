@@ -1,0 +1,54 @@
+Metadata-Version: 2.1
+Name: opentelemetry-instrumentation-botocore
+Version: 0.36b0
+Summary: OpenTelemetry Botocore instrumentation
+Project-URL: Homepage, https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-botocore
+Author-email: OpenTelemetry Authors <cncf-opentelemetry-contributors@lists.cncf.io>
+License-File: LICENSE
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.7
+Requires-Dist: opentelemetry-api~=1.12
+Requires-Dist: opentelemetry-instrumentation==0.36b0
+Requires-Dist: opentelemetry-semantic-conventions==0.36b0
+Provides-Extra: instruments
+Requires-Dist: botocore~=1.0; extra == 'instruments'
+Provides-Extra: test
+Requires-Dist: markupsafe==2.0.1; extra == 'test'
+Requires-Dist: moto[all]~=2.2.6; extra == 'test'
+Requires-Dist: opentelemetry-instrumentation-botocore[instruments]; extra == 'test'
+Requires-Dist: opentelemetry-test-utils==0.36b0; extra == 'test'
+Description-Content-Type: text/x-rst
+
+OpenTelemetry Botocore Tracing
+==============================
+
+|pypi|
+
+.. |pypi| image:: https://badge.fury.io/py/opentelemetry-instrumentation-botocore.svg
+   :target: https://pypi.org/project/opentelemetry-instrumentation-botocore/
+
+This library allows tracing requests made by the Botocore library.
+
+Installation
+------------
+
+::
+
+    pip install opentelemetry-instrumentation-botocore
+
+
+References
+----------
+
+* `OpenTelemetry Botocore Tracing <https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/botocore/botocore.html>`_
+* `OpenTelemetry Project <https://opentelemetry.io/>`_
+* `OpenTelemetry Python Examples <https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples>`_

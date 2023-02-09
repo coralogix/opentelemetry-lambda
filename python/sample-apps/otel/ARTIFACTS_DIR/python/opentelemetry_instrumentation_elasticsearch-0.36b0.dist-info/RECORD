@@ -1,0 +1,13 @@
+opentelemetry/instrumentation/elasticsearch/__init__.py,sha256=t-xj5AwXiD1u1A0IJfefcf4W-oq-RXgMXM8Oxp38P-M,8721
+opentelemetry/instrumentation/elasticsearch/__pycache__/__init__.cpython-310.pyc,,
+opentelemetry/instrumentation/elasticsearch/__pycache__/package.cpython-310.pyc,,
+opentelemetry/instrumentation/elasticsearch/__pycache__/version.cpython-310.pyc,,
+opentelemetry/instrumentation/elasticsearch/package.py,sha256=LPwj2VHWV6ABf7Zg5DdBFdnMr2MuXSNJddvL0IjxRXM,627
+opentelemetry/instrumentation/elasticsearch/version.py,sha256=L1GyyH9aX4auAX7oREcQi0ZYu_Pv_dkqR3WiACtblqQ,608
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/METADATA,sha256=TPGuDz7oiqbycrBGhBpZeCsDH1BDPPNL5ae1us_mCo0,2301
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/RECORD,,
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/WHEEL,sha256=NaLmgHHW_f9jTvv_wRh9vcK7c7EK9o5fwsIXMOzoGgM,87
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/entry_points.txt,sha256=5B6IeLfJ-zDbb-gP7iHbyFLIHPkPsxvHfAz1_GxuXAo,115
+opentelemetry_instrumentation_elasticsearch-0.36b0.dist-info/licenses/LICENSE,sha256=h8jwqxShIeVkc8vOo9ynxGYW16f4fVPxLhZKZs0H5U8,11350
