@@ -4,11 +4,25 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs14.x
+  tracing:
+    lambda: true
+  layers:
+  - arn:aws:lambda:us-east-1:233273809180:layer:opentelemetry-nodejs-wrapper-cx:1
+  - arn:aws:lambda:us-east-1:233273809180:layer:coralogix-aws-lambda-telemetry-exporter-x86_64-development:2
+  environment:
+    AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler'
+    CORALOGIX_DOMAIN: <coralogix domain>
+    CORALOGIX_OTLP_SERVER_ENABLED: 'true'
+    CORALOGIX_PRIVATE_KEY: <coralogix priavte key>
+    CORALOGIX_REPORTING_STRATEGY: 'report_after_invocation'
+    CORALOGIX_TRACING_MODE: 'opentelemetry_instrumentation'
+    OTEL_LOG_LEVEL: 'INFO'
+    CORALOGIX_DIAGNOSTIC_LOG: 'info,coralogix_aws_lambda_telemetry_exporter=trace,lambda_extension=trace'
 
 functions:
-  hello:
+  getBuckets:
     handler: handler.hello
+    environment:
+      OTEL_LOG_LEVEL: 'DEBUG'
     events:
-      - httpApi:
-          path: /
-          method: get
+      - httpApi: 'GET /buckets'
