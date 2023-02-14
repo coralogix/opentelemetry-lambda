@@ -26,7 +26,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "@coralogix/instrumentation-aws-lambda": "0.34.7-SNAPSHOT",
+    "@coralogix/instrumentation-aws-lambda": "0.34.9-SNAPSHOT",
     "@opentelemetry/api": "^1.3.0",
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.34.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.34.0",

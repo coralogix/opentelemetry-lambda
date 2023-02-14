@@ -1,7 +1,7 @@
 variable "name" {
   type        = string
   description = "Name of created function and API Gateway"
-  default     = "hello-nodejs-awssdk"
+  default     = "hello-nodejs-awssdk-us-east-2"
 }
 
 variable "collector_layer_arn" {
