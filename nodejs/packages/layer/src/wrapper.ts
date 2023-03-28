@@ -15,10 +15,22 @@ import {
   envDetector,
   processDetector,
 } from '@opentelemetry/resources';
-import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+import { AwsInstrumentation } from '@coralogix/instrumentation-aws-sdk';
+import {
+  context as otelContext,
+  defaultTextMapGetter,
+  Context as OtelContext,
+  diag,
+  DiagConsoleLogger,
+  DiagLogLevel,
+  propagation,
+  Span,
+  trace,
+} from '@opentelemetry/api';
 import { getEnv } from '@opentelemetry/core';
 import { AwsLambdaInstrumentationConfig } from '@coralogix/instrumentation-aws-lambda';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 
 // Use require statements for instrumentation to avoid having to have transitive dependencies on all the typescript
 // definitions.
@@ -45,35 +57,140 @@ const {
 const {
   MySQLInstrumentation,
 } = require('@opentelemetry/instrumentation-mysql');
-const { NetInstrumentation } = require('@opentelemetry/instrumentation-net');
 const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
 const {
   RedisInstrumentation,
 } = require('@opentelemetry/instrumentation-redis');
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 
 declare global {
   // in case of downstream configuring span processors etc
   function configureTracerProvider(tracerProvider: NodeTracerProvider): void;
+
   function configureTracer(defaultConfig: NodeTracerConfig): NodeTracerConfig;
+
   function configureSdkRegistration(
     defaultSdkRegistration: SDKRegistrationConfig
   ): SDKRegistrationConfig;
+
   function configureLambdaInstrumentation(
     config: AwsLambdaInstrumentationConfig
   ): AwsLambdaInstrumentationConfig;
 }
 
-console.log('Registering OpenTelemetry');
+const OtelAttributes = {
+  RPC_REQUEST_PAYLOAD: 'rpc.request.payload',
+  RPC_RESPONSE_PAYLOAD: 'rpc.request.payload',
+  DB_RESPONSE: 'db.response',
+};
 
+const DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT = 200;
+
+const parseIntEnvvar = (envName: string): number | undefined => {
+  const envVar = process.env?.[envName];
+  if (envVar === undefined) return undefined;
+  const numericEnvvar = parseInt(envVar);
+  if (isNaN(numericEnvvar)) return undefined;
+  return numericEnvvar;
+};
+
+const OTEL_PAYLOAD_SIZE_LIMIT: number =
+  parseIntEnvvar('OTEL_PAYLOAD_SIZE_LIMIT') ?? DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT;
+
+console.log('Registering OpenTelemetry');
+const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
+  requestHook: (span, { event }) => {
+    const data =
+      event && typeof event === 'object'
+        ? JSON.stringify(event)
+        : event?.toString();
+    if (data !== undefined) {
+      span.setAttribute(
+        OtelAttributes.RPC_REQUEST_PAYLOAD,
+        data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+      );
+    }
+  },
+  disableAwsContextPropagation: true,
+  eventContextExtractor: (event, context) => {
+    // try to extract propagation from http headers first
+    const httpHeaders = event.headers || {};
+    const extractedHttpContext: OtelContext = propagation.extract(
+      otelContext.active(),
+      httpHeaders,
+      defaultTextMapGetter
+    );
+    if (trace.getSpan(extractedHttpContext)?.spanContext()) {
+      return extractedHttpContext;
+    }
+
+    // extract from client context
+    if (context.clientContext?.Custom) {
+      try {
+        const extractedClientContextOtelContext: OtelContext =
+          propagation.extract(
+            otelContext.active(),
+            context.clientContext.Custom,
+            defaultTextMapGetter
+          );
+        if (trace.getSpan(extractedClientContextOtelContext)?.spanContext()) {
+          return extractedClientContextOtelContext;
+        }
+      } catch (e) {
+        diag.debug(
+          'error extracting context from lambda client context payload',
+          e
+        );
+      }
+    } else if ((context.clientContext as any)?.custom) {
+      try {
+        const extractedClientContextOtelContext: OtelContext =
+          propagation.extract(
+            otelContext.active(),
+            (context.clientContext as any).custom,
+            defaultTextMapGetter
+          );
+        if (trace.getSpan(extractedClientContextOtelContext)?.spanContext()) {
+          return extractedClientContextOtelContext;
+        }
+      } catch (e) {
+        diag.debug(
+          'error extracting context from lambda client context payload',
+          e
+        );
+      }
+    }
+    return otelContext.active();
+  },
+};
 const instrumentations = [
   new AwsInstrumentation({
     suppressInternalInstrumentation: true,
+    preRequestHook: (span: Span, { request }) => {
+      const data = JSON.stringify(request.commandInput);
+      if (data !== undefined) {
+        span.setAttribute(
+          OtelAttributes.RPC_REQUEST_PAYLOAD,
+          data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+        );
+      }
+    },
+    responseHook: (span, { response }) => {
+      const data =
+        'data' in response && typeof response.data === 'object'
+          ? JSON.stringify(response.data)
+          : response?.data?.toString();
+      if (data !== undefined) {
+        span.setAttribute(
+          OtelAttributes.RPC_RESPONSE_PAYLOAD,
+          data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+        );
+      }
+    },
   }),
   new AwsLambdaInstrumentation(
     typeof configureLambdaInstrumentation === 'function'
-      ? configureLambdaInstrumentation({})
-      : {}
+      ? configureLambdaInstrumentation(lambdaAutoInstrumentConfig)
+      : lambdaAutoInstrumentConfig
   ),
   new DnsInstrumentation(),
   new ExpressInstrumentation(),
@@ -85,9 +202,40 @@ const instrumentations = [
   new KoaInstrumentation(),
   new MongoDBInstrumentation(),
   new MySQLInstrumentation(),
-  new NetInstrumentation(),
-  new PgInstrumentation(),
-  new RedisInstrumentation(),
+  new PgInstrumentation({
+    responseHook: (span: Span, responseInfo: PgResponseHookInformation) => {
+      try {
+        if (responseInfo?.data?.rows) {
+          const data = JSON.stringify(responseInfo?.data?.rows);
+          span.setAttribute(
+            OtelAttributes.DB_RESPONSE,
+            data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+          );
+        }
+      } catch (e) {
+        return;
+      }
+    },
+  }),
+  new RedisInstrumentation({
+    responseHook: (
+      span: Span,
+      cmdName: string,
+      cmdArgs: string[],
+      response: unknown
+    ) => {
+      const data =
+        response && typeof response === 'object'
+          ? JSON.stringify(response)
+          : response?.toString();
+      if (data !== undefined) {
+        span.setAttribute(
+          OtelAttributes.DB_RESPONSE,
+          data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+        );
+      }
+    },
+  }),
 ];
 
 // configure lambda logging
@@ -110,6 +258,10 @@ async function initializeProvider() {
   if (typeof configureTracer === 'function') {
     config = configureTracer(config);
   }
+
+  // manually set OTEL_TRACES_EXPORTER to null to error
+  // undefined ERROR Exporter "otlp" requested through environment variable is unavailable.
+  process.env.OTEL_TRACES_EXPORTER = 'none';
 
   const tracerProvider = new NodeTracerProvider(config);
   /*
@@ -143,4 +295,5 @@ async function initializeProvider() {
     tracerProvider,
   });
 }
+
 initializeProvider();
