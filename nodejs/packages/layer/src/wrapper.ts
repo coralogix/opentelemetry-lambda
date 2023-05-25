@@ -79,7 +79,7 @@ declare global {
 
 const OtelAttributes = {
   RPC_REQUEST_PAYLOAD: 'rpc.request.payload',
-  RPC_RESPONSE_PAYLOAD: 'rpc.request.payload',
+  RPC_RESPONSE_PAYLOAD: 'rpc.response.payload',
   DB_RESPONSE: 'db.response',
 };
 
