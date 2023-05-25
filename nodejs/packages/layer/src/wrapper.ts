@@ -83,7 +83,7 @@ const OtelAttributes = {
   DB_RESPONSE: 'db.response',
 };
 
-const DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT = 200;
+const DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT = 50 * 1024;
 
 const parseIntEnvvar = (envName: string): number | undefined => {
   const envVar = process.env?.[envName];
