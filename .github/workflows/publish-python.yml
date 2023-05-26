@@ -1,0 +1,36 @@
+name: Publish Python
+
+on: 
+  workflow_dispatch:
+    # inputs:
+    #   environment:
+    #     description: 'Actually publish or just test?'
+    #     type: environment
+    #     required: true
+    #     default: test
+
+jobs:
+
+  build-and-publish:
+    runs-on: ubuntu-latest
+    # if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    # environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+      with:
+        path: ./opentelemetry-python-contrib
+        name: coralogix/opentelemetry-python-contrib
+        ref: refs/heads/coralogix-python-dev
+        token: ${{ secrets.GH_TOKEN }}
+    - name: build opentelemetry-instrumentation-aws-lambda
+      run: |
+        pip3 wheel -e ./opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-aws-lambda
+        cp ./opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-aws-lambda/opentelemetry_instrumentation_aws_lambda-*.whl python/sample-apps/otel/
+
+
+    # - uses: aws-actions/configure-aws-credentials@v2
+    #   with:
+    #     aws-access-key-id: ${{ vars.SAR_AWS_ACCESS_KEY_ID }}
+    #     aws-secret-access-key: ${{ secrets.SAR_AWS_SECRET_ACCESS_KEY }}
+    #     aws-region: ${{ vars.SAR_AWS_DEFAULT_REGION }}
