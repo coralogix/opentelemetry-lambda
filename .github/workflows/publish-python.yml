@@ -25,10 +25,34 @@ jobs:
         ref: refs/heads/coralogix-python-dev
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
     - name: build opentelemetry-instrumentation-aws-lambda
+      working-directory: ./python/sample-apps/otel
+      run: pip3 wheel -e ../../../opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-aws-lambda
+    - name: build opentelemetry-instrumentation-botocore
+      working-directory: ./python/sample-apps/otel
+      run: pip3 wheel -e ../../../opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-botocore
+    - name: build layer
+      working-directory: ./python/sample-apps/otel
       run: |
-        pip3 wheel -e ./opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-aws-lambda
-        cp ./opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-aws-lambda/opentelemetry_instrumentation_aws_lambda-*.whl python/sample-apps/otel/
-
+        mkdir -p ./build
+        python3 -m pip install -r otel_sdk/requirements.txt -t ./build/python
+        python3 -m pip install -r otel_sdk/requirements-nodeps.txt -t ./build/tmp --no-deps
+        cp -r ./build/tmp/* ./build/python/
+        rm -rf ./build/tmp
+        mv otel_sdk/otel_wrapper.py ./build/python
+        mv otel_sdk/otel-instrument ./build
+        chmod 755 ./build/otel-instrument
+        rm -rf ./build/python/boto*
+        rm -rf ./build/python/urllib3*
+    - name: package layer
+      working-directory: ./python/sample-apps/otel/build
+      run: zip -r layer.zip otel-instrument python
+    - name: Upload package
+      uses: actions/upload-artifact@v3
+      with:
+        name: layer.zip
+        path: ./python/sample-apps/otel/build/layer.zip
+        if-no-files-found: error
+        retention-days: 1
 
     # - uses: aws-actions/configure-aws-credentials@v2
     #   with:
