@@ -11,3 +11,4 @@ terraform.*
 .vscode/
 
 .DS_Store
+*.whl
