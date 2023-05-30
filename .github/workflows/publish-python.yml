@@ -12,8 +12,8 @@ on:
 
 jobs:
 
-  build-and-publish:
-    runs-on: ubuntu-latest
+  package:
+    runs-on: ubuntu-22.04
     # if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
     # environment: ${{ inputs.environment }}
     steps:
@@ -53,8 +53,29 @@ jobs:
         if-no-files-found: error
         retention-days: 1
 
-    # - uses: aws-actions/configure-aws-credentials@v2
-    #   with:
-    #     aws-access-key-id: ${{ vars.SAR_AWS_ACCESS_KEY_ID }}
-    #     aws-secret-access-key: ${{ secrets.SAR_AWS_SECRET_ACCESS_KEY }}
-    #     aws-region: ${{ vars.SAR_AWS_DEFAULT_REGION }}
+  publish-layer:
+    runs-on: ubuntu-22.04
+    # if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    needs: [package]
+    # environment: ${{ inputs.environment }}
+    environment: test
+    steps:
+    - uses: actions/checkout@v3
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ vars.LAYER_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.LAYER_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.LAYER_AWS_DEFAULT_REGION }}
+    - name: create target dir
+      run: mkdir -p target
+    - name: Download layer.zip
+      uses: actions/download-artifact@v3
+      with:
+        name: layer.zip
+        path: target
+    - name: Publish layer
+      env:
+        LAYER_NAME: "coralogix-opentelemetry-python-wrapper"
+        COMPATIBLE_RUNTIMES: "python3.7 python3.8 python3.9"
+      # run: ./ci-scripts/publish_${{ inputs.environment }}.sh
+      run: ./ci-scripts/publish_test.sh
