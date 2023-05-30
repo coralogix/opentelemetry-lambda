@@ -51,7 +51,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.SIGNER_AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
     - name: Upload package to S3
-      run: aws s3 cp layer.zip s3://${{ vars.SIGNER_BUCKET }}/to-be-signed/
+      run: aws s3 cp ./python/sample-apps/otel/build/layer.zip s3://${{ vars.SIGNER_BUCKET }}/to-be-signed/
     - name: Get S3 version of the uploaded file
       run: |
         LATEST_VERSION=$(aws s3api list-object-versions --bucket ${{ vars.SIGNER_BUCKET }} --prefix to-be-signed/layer.zip --query 'Versions[?IsLatest].[VersionId]' --output text)
@@ -69,12 +69,12 @@ jobs:
         max-wait-time: 60
         rename-signed-object: true
     - name: Download the signed package from S3
-      run: aws s3 cp s3://${{ vars.SIGNER_BUCKET }}/signed/layer.zip layer.zip
+      run: aws s3 cp s3://${{ vars.SIGNER_BUCKET }}/signed/layer.zip ./layer.zip
     - name: Upload package
       uses: actions/upload-artifact@v3
       with:
         name: layer.zip
-        path: ./python/sample-apps/otel/build/layer.zip
+        path: ./layer.zip
         if-no-files-found: error
         retention-days: 1
 
