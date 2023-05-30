@@ -34,18 +34,17 @@ jobs:
       working-directory: ./python/sample-apps/otel
       run: |
         mkdir -p ./build
-        python3 -m pip install -r otel_sdk/requirements.txt -t ./build/python
-        python3 -m pip install -r otel_sdk/requirements-nodeps.txt -t ./build/tmp --no-deps
+        python3 -m pip install -r ./otel_sdk/requirements.txt -t ./build/python
+        python3 -m pip install -r ./otel_sdk/requirements-nodeps.txt -t ./build/tmp --no-deps
         cp -r ./build/tmp/* ./build/python/
         rm -rf ./build/tmp
-        mv otel_sdk/otel_wrapper.py ./build/python
-        mv otel_sdk/otel-instrument ./build
+        cp ./otel_sdk/* ./build/
         chmod 755 ./build/otel-instrument
         rm -rf ./build/python/boto*
         rm -rf ./build/python/urllib3*
     - name: package layer
       working-directory: ./python/sample-apps/otel/build
-      run: zip -r layer.zip otel-instrument python
+      run: zip -r layer.zip *
     - name: Upload package
       uses: actions/upload-artifact@v3
       with:
