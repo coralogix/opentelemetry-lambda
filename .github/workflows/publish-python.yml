@@ -45,6 +45,31 @@ jobs:
     - name: package layer
       working-directory: ./python/sample-apps/otel/build
       run: zip -r layer.zip *
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ vars.SIGNER_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SIGNER_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
+    - name: Upload package to S3
+      run: aws s3 cp layer.zip s3://${{ vars.SIGNER_BUCKET }}/to-be-signed/
+    - name: Get S3 version of the uploaded file
+      run: |
+        LATEST_VERSION=$(aws s3api list-object-versions --bucket ${{ vars.SIGNER_BUCKET }} --prefix to-be-signed/layer.zip --query 'Versions[?IsLatest].[VersionId]' --output text)
+        echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+    - name: Sign the package
+      uses: clowdhaus/aws-lambda-code-signing-action@v1.3.0
+      with:
+        aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
+        source-s3-bucket: ${{ vars.SIGNER_BUCKET }}
+        source-s3-key: to-be-signed/layer.zip
+        source-s3-version: ${{ env.LATEST_VERSION }}
+        destination-s3-bucket: ${{ vars.SIGNER_BUCKET }}
+        destination-s3-prefix: signed/
+        profile-name: ${{ vars.SIGNER_PROFILE_NAME }}
+        max-wait-time: 60
+        rename-signed-object: true
+    - name: Download the signed package from S3
+      run: aws s3 cp s3://${{ vars.SIGNER_BUCKET }}/signed/layer.zip layer.zip
     - name: Upload package
       uses: actions/upload-artifact@v3
       with:
