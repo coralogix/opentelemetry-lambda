@@ -1,21 +1,20 @@
 name: Publish Python
 
 on: 
-  push:
-  # workflow_dispatch:
-    # inputs:
-    #   environment:
-    #     description: 'Actually publish or just test?'
-    #     type: environment
-    #     required: true
-    #     default: test
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Actually publish or just test?'
+        type: environment
+        required: true
+        default: test
 
 jobs:
 
   package:
     runs-on: ubuntu-22.04
-    # if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
-    # environment: ${{ inputs.environment }}
+    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    environment: ${{ inputs.environment }}
     steps:
     - uses: actions/checkout@v3
     - uses: actions/checkout@v3
@@ -38,7 +37,8 @@ jobs:
         python3 -m pip install -r ./otel_sdk/requirements-nodeps.txt -t ./build/tmp --no-deps
         cp -r ./build/tmp/* ./build/python/
         rm -rf ./build/tmp
-        cp ./otel_sdk/* ./build/
+        cp ./otel_sdk/otel-instrument ./build/
+        cp ./otel_sdk/otel_wrapper.py ./build/python/
         chmod 755 ./build/otel-instrument
         rm -rf ./build/python/boto*
         rm -rf ./build/python/urllib3*
@@ -55,10 +55,9 @@ jobs:
 
   publish-layer:
     runs-on: ubuntu-22.04
-    # if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
     needs: [package]
-    # environment: ${{ inputs.environment }}
-    environment: test
+    environment: ${{ inputs.environment }}
     steps:
     - uses: actions/checkout@v3
     - uses: aws-actions/configure-aws-credentials@v2
@@ -76,6 +75,5 @@ jobs:
     - name: Publish layer
       env:
         LAYER_NAME: "coralogix-opentelemetry-python-wrapper"
-        COMPATIBLE_RUNTIMES: "python3.7 python3.8 python3.9"
-      # run: ./ci-scripts/publish_${{ inputs.environment }}.sh
-      run: ./ci-scripts/publish_test.sh
+        COMPATIBLE_RUNTIMES: "python3.8 python3.9"
+      run: ./ci-scripts/publish_${{ inputs.environment }}.sh
