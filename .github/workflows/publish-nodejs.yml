@@ -1,0 +1,94 @@
+name: Publish Node.js
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Actually publish or just test?'
+        type: environment
+        required: true
+        default: test
+
+jobs:
+
+  package:
+    runs-on: ubuntu-22.04
+    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+      with:
+        path: ./opentelemetry-js-contrib
+        repository: coralogix/opentelemetry-js-contrib
+        ref: refs/heads/aws-lambda-trigger
+        ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
+    - name: build instrumentation-aws-lambda
+      working-directory: ./opentelemetry-js-contrib
+      run: npm pack @coralogix/instrumentation-aws-lambda
+    - name: build instrumentation-aws-sdk
+      working-directory: ./opentelemetry-js-contrib
+      run: npm pack @coralogix/instrumentation-aws-sdk
+    - name: build layer
+      working-directory: ./nodejs/packages/layer
+      run: |
+        npm install ../../../opentelemetry-js-contrib-cx/coralogix-instrumentation-aws-lambda-*.tgz
+        npm install ../../../opentelemetry-js-contrib-cx/coralogix-instrumentation-aws-sdk-*.tgz
+        npm run compile
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ vars.SIGNER_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SIGNER_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
+    - name: Upload package to S3
+      run: aws s3 cp ./nodejs/packages/layer/build/layer.zip s3://${{ vars.SIGNER_BUCKET }}/to-be-signed/nodejs-layer.zip
+    - name: Get S3 version of the uploaded file
+      run: |
+        LATEST_VERSION=$(aws s3api list-object-versions --bucket ${{ vars.SIGNER_BUCKET }} --prefix to-be-signed/nodejs-layer.zip --query 'Versions[?IsLatest].[VersionId]' --output text)
+        echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+    - name: Sign the package
+      uses: clowdhaus/aws-lambda-code-signing-action@v1.3.0
+      with:
+        aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
+        source-s3-bucket: ${{ vars.SIGNER_BUCKET }}
+        source-s3-key: to-be-signed/layer.zip
+        source-s3-version: ${{ env.LATEST_VERSION }}
+        destination-s3-bucket: ${{ vars.SIGNER_BUCKET }}
+        destination-s3-prefix: signed/
+        profile-name: ${{ vars.SIGNER_PROFILE_NAME }}
+        max-wait-time: 60
+        rename-signed-object: true
+    - name: Download the signed package from S3
+      run: aws s3 cp s3://${{ vars.SIGNER_BUCKET }}/signed/nodejs-layer.zip ./layer.zip
+    - name: Upload package
+      uses: actions/upload-artifact@v3
+      with:
+        name: layer.zip
+        path: ./layer.zip
+        if-no-files-found: error
+        retention-days: 1
+
+  publish-layer:
+    runs-on: ubuntu-22.04
+    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    needs: [package]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ vars.LAYER_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.LAYER_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.LAYER_AWS_DEFAULT_REGION }}
+    - name: create target dir
+      run: mkdir -p target
+    - name: Download layer.zip
+      uses: actions/download-artifact@v3
+      with:
+        name: layer.zip
+        path: target
+    - name: Publish layer
+      env:
+        LAYER_NAME: "coralogix-opentelemetry-nodejs-wrapper"
+        COMPATIBLE_RUNTIMES: "nodejs14.x nodejs16.x nodejs18.x"
+      run: ./ci-scripts/publish_${{ inputs.environment }}.sh
