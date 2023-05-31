@@ -1,0 +1,10 @@
+name: Publish Node.js
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Actually publish or just test?'
+        type: environment
+        required: true
+        default: test
