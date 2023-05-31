@@ -56,7 +56,7 @@ jobs:
       with:
         aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
         source-s3-bucket: ${{ vars.SIGNER_BUCKET }}
-        source-s3-key: to-be-signed/layer.zip
+        source-s3-key: to-be-signed/nodejs-layer.zip
         source-s3-version: ${{ env.LATEST_VERSION }}
         destination-s3-bucket: ${{ vars.SIGNER_BUCKET }}
         destination-s3-prefix: signed/
