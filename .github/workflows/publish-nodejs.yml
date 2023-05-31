@@ -12,7 +12,7 @@ on:
 jobs:
 
   package:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-4core
     if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
     steps:
@@ -32,12 +32,9 @@ jobs:
     - name: build instrumentation-aws-sdk
       working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk
       run: npm install --ignore-scripts && npm pack --ignore-scripts
-    - name: install coralogix-instrumentation-aws-lambda
+    - name: install forked opentelemetry-js-contrib libraries
       working-directory: ./nodejs/packages/layer
-      run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz
-    - name: install coralogix-instrumentation-aws-sdk
-      working-directory: ./nodejs/packages/layer
-      run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
+      run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
     - name: build layer
       working-directory: ./nodejs/packages/layer
       run: npm run compile
