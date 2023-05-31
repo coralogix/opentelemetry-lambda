@@ -35,8 +35,8 @@ jobs:
     - name: install forked opentelemetry-js-contrib libraries
       working-directory: ./nodejs/packages/layer
       run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
-    - name: install copyfiles # it's used by npm run compile
-      run: npm install copyfiles -g
+    - name: install copyfiles and  # it's used by npm run compile
+      run: npm install -g copyfiles bestzip
     - name: build layer
       working-directory: ./nodejs/packages/layer
       run: npm run compile
