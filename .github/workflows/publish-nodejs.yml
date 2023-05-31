@@ -32,12 +32,15 @@ jobs:
     - name: build instrumentation-aws-sdk
       working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk
       run: npm install --ignore-scripts && npm pack --ignore-scripts
+    - name: install coralogix-instrumentation-aws-lambda
+      working-directory: ./nodejs/packages/layer
+      run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz
+    - name: install coralogix-instrumentation-aws-sdk
+      working-directory: ./nodejs/packages/layer
+      run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
     - name: build layer
       working-directory: ./nodejs/packages/layer
-      run: |
-        npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz
-        npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
-        npm run compile
+      run: npm run compile
     - uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ vars.SIGNER_AWS_ACCESS_KEY_ID }}
