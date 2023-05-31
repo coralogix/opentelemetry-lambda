@@ -24,16 +24,16 @@ jobs:
         ref: refs/heads/aws_lambda_trigger
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
     - name: build instrumentation-aws-lambda
-      working-directory: ./opentelemetry-js-contrib
-      run: npm pack @coralogix/instrumentation-aws-lambda
+      working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda
+      run: npm install && npm pack
     - name: build instrumentation-aws-sdk
-      working-directory: ./opentelemetry-js-contrib
-      run: npm pack @coralogix/instrumentation-aws-sdk
+      working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk
+      run: npm install && npm pack
     - name: build layer
       working-directory: ./nodejs/packages/layer
       run: |
-        npm install ../../../opentelemetry-js-contrib-cx/coralogix-instrumentation-aws-lambda-*.tgz
-        npm install ../../../opentelemetry-js-contrib-cx/coralogix-instrumentation-aws-sdk-*.tgz
+        npm install ../../../opentelemetry-js-contrib-cx/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz
+        npm install ../../../opentelemetry-js-contrib-cx/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
         npm run compile
     - uses: aws-actions/configure-aws-credentials@v2
       with:
