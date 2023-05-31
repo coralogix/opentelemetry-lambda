@@ -21,8 +21,11 @@ jobs:
       with:
         path: ./opentelemetry-js-contrib
         repository: coralogix/opentelemetry-js-contrib
-        ref: refs/heads/ci-test
+        ref: refs/heads/aws_lambda_trigger
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
+    - name: generate version files
+      working-directory: ./opentelemetry-js-contrib
+      run: lerna run version:update
     - name: build instrumentation-aws-lambda
       working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda
       run: npm install && npm pack
