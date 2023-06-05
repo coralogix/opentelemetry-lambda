@@ -14,11 +14,11 @@ RUN mkdir -p /build && \
   cp -r /build/tmp/* /build/python/ && \
   rm -rf /build/tmp && \
   mv otel_sdk/otel_wrapper.py /build/python && \
-  mv otel_sdk/otel-instrument /build && \
-  chmod 755 /build/otel-instrument && \
+  mv otel_sdk/otel-handler /build && \
+  chmod 755 /build/otel-handler && \
   rm -rf /build/python/boto* && \
   rm -rf /build/python/urllib3* && \
   cd /build && \
-  zip -r layer.zip otel-instrument python
+  zip -r layer.zip otel-handler python
 
 CMD cp /build/layer.zip /out/layer.zip

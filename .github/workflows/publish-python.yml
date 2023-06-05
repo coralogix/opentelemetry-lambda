@@ -37,9 +37,9 @@ jobs:
         python3 -m pip install -r ./otel_sdk/requirements-nodeps.txt -t ./build/tmp --no-deps
         cp -r ./build/tmp/* ./build/python/
         rm -rf ./build/tmp
-        cp ./otel_sdk/otel-instrument ./build/
+        cp ./otel_sdk/otel-handler ./build/
         cp ./otel_sdk/otel_wrapper.py ./build/python/
-        chmod 755 ./build/otel-instrument
+        chmod 755 ./build/otel-handler
         rm -rf ./build/python/boto*
         rm -rf ./build/python/urllib3*
     - name: package layer

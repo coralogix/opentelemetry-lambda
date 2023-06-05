@@ -15,7 +15,7 @@
 # limitations under the License.
 
 : <<'END_DOCUMENTATION'
-`otel-instrument`
+`otel-handler`
 
 This script configures and sets up OpenTelemetry Python with the values we
 expect will be used by the common user. It does this by setting the environment
@@ -41,7 +41,7 @@ root level of a Lambda Layer:
 
 .. code::
 
-    AWS_LAMBDA_EXEC_WRAPPER = /opt/otel-instrument
+    AWS_LAMBDA_EXEC_WRAPPER = /opt/otel-handler
 
 END_DOCUMENTATION
 
