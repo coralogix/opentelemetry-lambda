@@ -32,11 +32,14 @@ jobs:
     - name: build instrumentation-aws-sdk
       working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk
       run: npm install --ignore-scripts && npm pack --ignore-scripts
+    - name: install copyfiles and  # it's used by npm run compile
+      run: npm install -g copyfiles bestzip
+    - name: Prepare clean build
+      working-directory: ./nodejs/packages/layer
+      run: rm -rf ./build ./node_modules
     - name: install forked opentelemetry-js-contrib libraries
       working-directory: ./nodejs/packages/layer
       run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
-    - name: install copyfiles and  # it's used by npm run compile
-      run: npm install -g copyfiles bestzip
     - name: build layer
       working-directory: ./nodejs/packages/layer
       run: npm run compile
