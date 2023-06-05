@@ -13,7 +13,7 @@ jobs:
 
   package:
     runs-on: ubuntu-22.04
-    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    if: ${{ github.ref == 'refs/heads/coralogix-nodejs-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
     steps:
     - uses: actions/checkout@v3
@@ -75,7 +75,7 @@ jobs:
 
   publish-layer:
     runs-on: ubuntu-22.04
-    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release') || inputs.environment == 'test' }}
+    if: ${{ github.ref == 'refs/heads/coralogix-nodejs-autoinstrumentation' || inputs.environment == 'test' }}
     needs: [package]
     environment: ${{ inputs.environment }}
     steps:
