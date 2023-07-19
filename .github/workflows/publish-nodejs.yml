@@ -21,7 +21,7 @@ jobs:
       with:
         path: ./opentelemetry-js-contrib
         repository: coralogix/opentelemetry-js-contrib
-        ref: refs/heads/handler-wrapping-issue
+        ref: refs/heads/coralogix-autoinstrumentation
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
     - name: Generate version files
       working-directory: ./opentelemetry-js-contrib
