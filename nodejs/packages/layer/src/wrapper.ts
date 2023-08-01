@@ -8,14 +8,15 @@ import {
   SDKRegistrationConfig,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { Instrumentation, registerInstrumentations } from '@opentelemetry/instrumentation';
 import { awsLambdaDetector } from '@opentelemetry/resource-detector-aws';
 import {
-  detectResources,
+  detectResourcesSync,
   envDetector,
   processDetector,
 } from '@opentelemetry/resources';
 import { AwsInstrumentation } from '@coralogix/instrumentation-aws-sdk';
+import { AwsLambdaInstrumentation } from '@coralogix/instrumentation-aws-lambda';
 import {
   context as otelContext,
   defaultTextMapGetter,
@@ -32,35 +33,72 @@ import { AwsLambdaInstrumentationConfig } from '@coralogix/instrumentation-aws-l
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 
-// Use require statements for instrumentation to avoid having to have transitive dependencies on all the typescript
-// definitions.
-const {
-  AwsLambdaInstrumentation,
-} = require('@coralogix/instrumentation-aws-lambda');
-const { DnsInstrumentation } = require('@opentelemetry/instrumentation-dns');
-const {
-  ExpressInstrumentation,
-} = require('@opentelemetry/instrumentation-express');
-const {
-  GraphQLInstrumentation,
-} = require('@opentelemetry/instrumentation-graphql');
-const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
-const { HapiInstrumentation } = require('@opentelemetry/instrumentation-hapi');
-const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-const {
-  IORedisInstrumentation,
-} = require('@opentelemetry/instrumentation-ioredis');
-const { KoaInstrumentation } = require('@opentelemetry/instrumentation-koa');
-const {
-  MongoDBInstrumentation,
-} = require('@opentelemetry/instrumentation-mongodb');
-const {
-  MySQLInstrumentation,
-} = require('@opentelemetry/instrumentation-mysql');
-const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
-const {
-  RedisInstrumentation,
-} = require('@opentelemetry/instrumentation-redis');
+import { MeterProvider, MeterProviderOptions } from '@opentelemetry/sdk-metrics';
+
+
+function defaultConfigureInstrumentations() {
+  // Use require statements for instrumentation to avoid having to have transitive dependencies on all the typescript
+  // definitions.
+  const { DnsInstrumentation } = require('@opentelemetry/instrumentation-dns');
+  const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
+  const { GraphQLInstrumentation } = require('@opentelemetry/instrumentation-graphql');
+  const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
+  const { HapiInstrumentation } = require('@opentelemetry/instrumentation-hapi');
+  const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+  const { IORedisInstrumentation } = require('@opentelemetry/instrumentation-ioredis');
+  const { KoaInstrumentation } = require('@opentelemetry/instrumentation-koa');
+  const { MongoDBInstrumentation } = require('@opentelemetry/instrumentation-mongodb');
+  const { MySQLInstrumentation } = require('@opentelemetry/instrumentation-mysql');
+  const { NetInstrumentation } = require('@opentelemetry/instrumentation-net');
+  const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
+  const { RedisInstrumentation } = require('@opentelemetry/instrumentation-redis');
+  return [ new DnsInstrumentation(),
+    new ExpressInstrumentation(),
+    new GraphQLInstrumentation(),
+    new GrpcInstrumentation(),
+    new HapiInstrumentation(),
+    new HttpInstrumentation(),
+    new IORedisInstrumentation(),
+    new KoaInstrumentation(),
+    new MongoDBInstrumentation(),
+    new MySQLInstrumentation(),
+    new NetInstrumentation(),
+    new PgInstrumentation({
+      responseHook: (span: Span, responseInfo: PgResponseHookInformation) => {
+        try {
+          if (responseInfo?.data?.rows) {
+            const data = JSON.stringify(responseInfo?.data?.rows);
+            span.setAttribute(
+              OtelAttributes.DB_RESPONSE,
+              data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+            );
+          }
+        } catch (e) {
+          return;
+        }
+      },
+    }),
+    new RedisInstrumentation({
+      responseHook: (
+        span: Span,
+        cmdName: string,
+        cmdArgs: string[],
+        response: unknown
+      ) => {
+        const data =
+          response && typeof response === 'object'
+            ? JSON.stringify(response)
+            : response?.toString();
+        if (data !== undefined) {
+          span.setAttribute(
+            OtelAttributes.DB_RESPONSE,
+            data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+          );
+        }
+      },
+    }),
+  ]
+}
 
 declare global {
   // in case of downstream configuring span processors etc
@@ -71,10 +109,10 @@ declare global {
   function configureSdkRegistration(
     defaultSdkRegistration: SDKRegistrationConfig
   ): SDKRegistrationConfig;
-
-  function configureLambdaInstrumentation(
-    config: AwsLambdaInstrumentationConfig
-  ): AwsLambdaInstrumentationConfig;
+  function configureMeter(defaultConfig: MeterProviderOptions): MeterProviderOptions;
+  function configureMeterProvider(meterProvider: MeterProvider): void
+  function configureLambdaInstrumentation(config: AwsLambdaInstrumentationConfig): AwsLambdaInstrumentationConfig
+  function configureInstrumentations(): Instrumentation[]
 }
 
 const OtelAttributes = {
@@ -162,6 +200,7 @@ const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
     return otelContext.active();
   },
 };
+
 const instrumentations = [
   new AwsInstrumentation({
     suppressInternalInstrumentation: true,
@@ -187,55 +226,8 @@ const instrumentations = [
       }
     },
   }),
-  new AwsLambdaInstrumentation(
-    typeof configureLambdaInstrumentation === 'function'
-      ? configureLambdaInstrumentation(lambdaAutoInstrumentConfig)
-      : lambdaAutoInstrumentConfig
-  ),
-  new DnsInstrumentation(),
-  new ExpressInstrumentation(),
-  new GraphQLInstrumentation(),
-  new GrpcInstrumentation(),
-  new HapiInstrumentation(),
-  new HttpInstrumentation(),
-  new IORedisInstrumentation(),
-  new KoaInstrumentation(),
-  new MongoDBInstrumentation(),
-  new MySQLInstrumentation(),
-  new PgInstrumentation({
-    responseHook: (span: Span, responseInfo: PgResponseHookInformation) => {
-      try {
-        if (responseInfo?.data?.rows) {
-          const data = JSON.stringify(responseInfo?.data?.rows);
-          span.setAttribute(
-            OtelAttributes.DB_RESPONSE,
-            data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
-          );
-        }
-      } catch (e) {
-        return;
-      }
-    },
-  }),
-  new RedisInstrumentation({
-    responseHook: (
-      span: Span,
-      cmdName: string,
-      cmdArgs: string[],
-      response: unknown
-    ) => {
-      const data =
-        response && typeof response === 'object'
-          ? JSON.stringify(response)
-          : response?.toString();
-      if (data !== undefined) {
-        span.setAttribute(
-          OtelAttributes.DB_RESPONSE,
-          data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
-        );
-      }
-    },
-  }),
+  new AwsLambdaInstrumentation(typeof configureLambdaInstrumentation === 'function' ? configureLambdaInstrumentation(lambdaAutoInstrumentConfig) : lambdaAutoInstrumentConfig),
+  ...(typeof configureInstrumentations === 'function' ? configureInstrumentations: defaultConfigureInstrumentations)()
 ];
 
 // configure lambda logging
@@ -248,7 +240,7 @@ registerInstrumentations({
 });
 
 async function initializeProvider() {
-  const resource = await detectResources({
+  const resource = detectResourcesSync({
     detectors: [awsLambdaDetector, envDetector, processDetector],
   });
 
@@ -289,10 +281,24 @@ async function initializeProvider() {
   }
   tracerProvider.register(sdkRegistrationConfig);
 
+  // Configure default meter provider (doesn't export metrics)
+  let meterConfig: MeterProviderOptions = {
+    resource,
+  }
+  if (typeof configureMeter === 'function') {
+    meterConfig = configureMeter(meterConfig);
+  }
+
+  const meterProvider = new MeterProvider(meterConfig);
+  if (typeof configureMeterProvider === 'function') {
+    configureMeterProvider(meterProvider)
+  }
+
   // Re-register instrumentation with initialized provider. Patched code will see the update.
   registerInstrumentations({
     instrumentations,
     tracerProvider,
+    meterProvider
   });
 }
 

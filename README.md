@@ -1,11 +1,13 @@
 # OpenTelemetry Lambda
-![GitHub Java Workflow Status](https://img.shields.io/github/workflow/status/open-telemetry/opentelemetry-lambda/Continuous%20Build%20(Java)/main?label=CI%20%28Java%29&style=for-the-badge)
-![GitHub Collector Workflow Status](https://img.shields.io/github/workflow/status/open-telemetry/opentelemetry-lambda/Continuous%20Build%20(Collector)/main?label=CI%20%28Collector%29&style=for-the-badge)
-![GitHub NodeJS Workflow Status](https://img.shields.io/github/workflow/status/open-telemetry/opentelemetry-lambda/Continuous%20Build%20(NodeJS)/main?label=CI%20%28NodeJS%29&style=for-the-badge)
-![GitHub Terraform Lint Workflow Status](https://img.shields.io/github/workflow/status/open-telemetry/opentelemetry-lambda/Continuous%20Build%20(Terraform)/main?label=CI%20%28Terraform%20Lint%29&style=for-the-badge)
-![GitHub Python Pull Request Workflow Status](https://img.shields.io/github/workflow/status/open-telemetry/opentelemetry-lambda/Pull%20Request%20(Python)/main?label=Pull%20Request%20%28Python%29&style=for-the-badge)
+
+![GitHub Java Workflow Status](https://img.shields.io/github/actions/workflow/status/open-telemetry/opentelemetry-lambda/ci-java.yml?branch%3Amain&label=CI%20%28Java%29&style=for-the-badge)
+![GitHub Collector Workflow Status](https://img.shields.io/github/actions/workflow/status/open-telemetry/opentelemetry-lambda/ci-collector.yml?branch%3Amain&label=CI%20%28Collector%29&style=for-the-badge)
+![GitHub NodeJS Workflow Status](https://img.shields.io/github/actions/workflow/status/open-telemetry/opentelemetry-lambda/ci-nodejs.yml?branch%3Amain&label=CI%20%28NodeJS%29&style=for-the-badge)
+![GitHub Terraform Lint Workflow Status](https://img.shields.io/github/actions/workflow/status/open-telemetry/opentelemetry-lambda/ci-terraform.yml?branch%3Amain&label=CI%20%28Terraform%20Lint%29&style=for-the-badge)
+![GitHub Python Pull Request Workflow Status](https://img.shields.io/github/actions/workflow/status/open-telemetry/opentelemetry-lambda/pr-python.yml?branch%3Amain&label=Pull%20Request%20%28Python%29&style=for-the-badge)
 
 ## OpenTelemetry Lambda Layers
+
 The OpenTelemetry Lambda Layers provide the OpenTelemetry (OTel) code to export telemetry asynchronously from AWS Lambdas. It does this by embedding a stripped-down version of [OpenTelemetry Collector Contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) inside an [AWS Lambda Extension Layer](https://aws.amazon.com/blogs/compute/introducing-aws-lambda-extensions-in-preview/).
 
 Some layers include the corresponding OTel language SDK for the Lambda. This allows Lambdas to use OpenTelemetry to send traces and metrics to any configured backend.
@@ -18,12 +20,80 @@ Some layers include the corresponding OTel language SDK for the Lambda. This all
 * ### [.NET + Collector Lambda Layer](dotnet/README.md)
 * ### [Collector Lambda Layer](collector/README.md)
 
-
 ## FAQ
+
 * **What exporters/recievers/processors are included from the OpenTelemetry Collector?**
     > You can check out [the stripped-down collector's imports](https://github.com/open-telemetry/opentelemetry-lambda/blob/main/collector/lambdacomponents/default.go#L18) in this repository for a full list of currently included components.
 * **Is the Lambda layer provided or do I need to build it and distribute it myself?**
     > This repository does not provide pre-build Lambda layers. They must be built manually and saved in your AWS account. This repo has files to facilitate doing that. More information is provided in [the Collector folder's README](collector/README.md).
 
 ## Design Proposal
+
 To get a better understanding of the proposed design for the OpenTelemetry Lamda extension, you can see the [Design Proposal here.](docs/design_proposal.md)
+
+## Features
+
+The following is a list of features provided by the OpenTelemetry layers.
+
+### OpenTelemetry collector
+
+The layer includes the OpenTelemetry Collector as a Lambda extension.
+
+### Custom context propagation carrier extraction
+
+Context can be propagated through various mechanisms (e.g. http headers (APIGW), message attributes (SQS), ...). In some cases, it may be required to pass a custom context propagation extractor in lambda through configuration, this feature allows this through Lambda instrumentation configuration.
+
+### X-Ray Env Var Span Link
+
+This links a context extracted from the Lambda runtime environment to the instrumentation-generated span rather than disabling that context extraction entirely.
+
+### Semantic conventions
+
+The Lambda language implementation follows the semantic conventions specified in the OpenTelemetry Specification.
+
+### Auto instrumentation
+
+The Lambda layer includes support for automatically instrumentation code via the use of instrumentation libraries.
+
+### Flush TracerProvider
+
+The Lambda instrumentation will flush the `TracerProvider` at the end of an invocation.
+
+### Flush MeterProvider
+
+The Lambda instrumentation will flush the `MeterProvider` at the end of an invocation.
+
+### Support matrix
+
+The table below captures the state of various features and their levels of support different runtimes.
+
+| Feature                    | Node | Python | Java | .NET | Go   | Ruby |
+| -------------------------- | :--: | :----: | :--: | :--: | :--: | :--: |
+| OpenTelemetry collector    |  +   |  +     |  +   |  +   |  +   |      |
+| Custom context propagation |  +   |  -     |  -   |  -   | N/A  |      |
+| X-Ray Env Var Span Link    |  -   |  -     |  -   |  -   | N/A  |      |
+| Semantic Conventions^      |      |  +     |  +   |  +   | N/A  |      |
+| - Trace General^<sup>[1]</sup>           |  +   |        |  +   |  +   | N/A  |      |
+| - Trace Incoming^<sup>[2]</sup>          |  -   |        |  -   |  +   | N/A  |      |
+| - Trace Outgoing^<sup>[3]</sup>          |  +   |        |  -   |  +   | N/A  |      |
+| - Metrics^<sup>[4]</sup>                 |  -   |        |  -   |  -   | N/A  |      |
+| Auto instrumentation       |      |   +    |  +   |  -   | N/A  |      |
+| Flush TracerProvider       |  +   |   +    |      |  +   |  +   |      |
+| Flush MeterProvider        |  +   |   +    |      |      |      |      |
+
+#### Legend
+
+* `+` is supported
+* `-` not supported
+* `^` subject to change depending on spec updates
+* `N/A` not applicable to the particular language
+* blank cell means the status of the feature is not known.
+
+The following are runtimes which are no longer or not yet supported by this repository:
+
+* Node.js 12 - not [officially supported](https://github.com/open-telemetry/opentelemetry-js#supported-runtimes) by OpenTelemetry JS
+
+[1]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/faas.md#general-attributes
+[2]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/faas.md#incoming-invocations
+[3]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/faas.md#outgoing-invocations
+[4]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/faas-metrics.md#faas-invocations
