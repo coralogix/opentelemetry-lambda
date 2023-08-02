@@ -16,117 +16,39 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
 
-	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/extensionapi"
-	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/telemetryapi"
-	"github.com/open-telemetry/opentelemetry-lambda/collector/lambdacomponents"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/open-telemetry/opentelemetry-lambda/collector/internal/lifecycle"
 )
 
 var (
-	extensionName = filepath.Base(os.Args[0]) // extension name has to match the filename
+	// Version variable will be replaced at link time after `make` has been run.
+	Version = "latest"
+
+	// GitHash variable will be replaced at link time after `make` has been run.
+	GitHash = "<NOT PROPERLY GENERATED>"
 )
 
 func main() {
+	versionFlag := flag.Bool("v", false, "prints version information")
+	flag.Parse()
+	if *versionFlag {
+		fmt.Println(Version)
+		return
+	}
+
 	logger := initLogger()
 	logger.Info("Launching OpenTelemetry Lambda extension", zap.String("version", Version))
 
-	ctx, lm := newLifecycleManager(context.Background(), logger)
+	ctx, lm := lifecycle.NewManager(context.Background(), logger, Version)
 
 	// Will block until shutdown event is received or cancelled via the context.
-	lm.processEvents(ctx)
-}
-
-type lifecycleManager struct {
-	logger          *zap.Logger
-	collector       *Collector
-	extensionClient *extensionapi.Client
-	listener        *telemetryapi.Listener
-}
-
-func newLifecycleManager(ctx context.Context, logger *zap.Logger) (context.Context, *lifecycleManager) {
-	ctx, cancel := context.WithCancel(ctx)
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT)
-	go func() {
-		s := <-sigs
-		cancel()
-		logger.Info("received signal", zap.String("signal", s.String()))
-	}()
-
-	extensionClient := extensionapi.NewClient(logger, os.Getenv("AWS_LAMBDA_RUNTIME_API"))
-	res, err := extensionClient.Register(ctx, extensionName)
-	if err != nil {
-		logger.Fatal("Cannot register extension", zap.Error(err))
-	}
-
-	listener := telemetryapi.NewListener(logger)
-	addr, err := listener.Start()
-	if err != nil {
-		logger.Fatal("Cannot start Telemetry API Listener", zap.Error(err))
-	}
-
-	telemetryClient := telemetryapi.NewClient(logger)
-	_, err = telemetryClient.Subscribe(ctx, res.ExtensionID, addr)
-	if err != nil {
-		logger.Fatal("Cannot register Telemetry API client", zap.Error(err))
-	}
-
-	factories, _ := lambdacomponents.Components()
-	collector := NewCollector(logger, factories)
-
-	if err = collector.Start(ctx); err != nil {
-		logger.Fatal("Failed to start the extension", zap.Error(err))
-		extensionClient.InitError(ctx, fmt.Sprintf("failed to start the collector: %v", err))
-	}
-
-	return ctx, &lifecycleManager{
-		logger:          logger.Named("lifecycleManager"),
-		collector:       collector,
-		extensionClient: extensionClient,
-		listener:        listener,
-	}
-}
-
-func (lm *lifecycleManager) processEvents(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			lm.logger.Debug("Waiting for event...")
-			res, err := lm.extensionClient.NextEvent(ctx)
-			if err != nil {
-				lm.logger.Warn("error waiting for extension event", zap.Error(err))
-				lm.extensionClient.ExitError(ctx, fmt.Sprintf("error waiting for extension event: %v", err))
-				return
-			}
-
-			lm.logger.Debug("Received ", zap.Any("event :", res))
-			// Exit if we receive a SHUTDOWN event
-			if res.EventType == extensionapi.Shutdown {
-				lm.logger.Info("Received SHUTDOWN event")
-				lm.listener.Shutdown()
-				err = lm.collector.Stop()
-				if err != nil {
-					lm.extensionClient.ExitError(ctx, fmt.Sprintf("error stopping collector: %v", err))
-				}
-				return
-			}
-
-			err = lm.listener.Wait(ctx, res.RequestID)
-			if err != nil {
-				lm.logger.Error("problem waiting for platform.runtimeDone event", zap.Error(err), zap.String("requestID", res.RequestID))
-			}
-		}
-	}
+	logger.Info("done", zap.Error(lm.Run(ctx)))
 }
 
 func initLogger() *zap.Logger {

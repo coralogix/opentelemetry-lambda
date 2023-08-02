@@ -24,20 +24,16 @@ is_sample() {
 
 main() {
 	echo "running..."
-	saved_args="$@"
+	saved_args="$*"
 	template='template.yml'
 	build=false
 	deploy=false
 	layer=false
 
-	region=${AWS_REGION-$(aws configure get region)}
 	stack=${OTEL_LAMBDA_STACK-"otel-stack"}
 	layerName=${OTEL_LAMBDA_LAYER-"otel-layer"}
 
-
-	collectorPath=${COLLECTOR_PATH-"../../collector"}
-
-	while getopts "hbdxlr:t:s:n:" opt; do
+	while getopts "hbdlr:t:s:n:" opt; do
 		case "${opt}" in
 		h)
 			echo_usage
@@ -75,6 +71,10 @@ main() {
 		esac
 	done
 
+	if [[ $deploy == true && $region == "" ]]; then
+		region=${AWS_REGION-$(aws configure get region)}
+	fi
+
 	echo "Invoked with: ${saved_args}"
 
 	if [[ $build == false && $deploy == false && $layer == false ]]; then
@@ -86,29 +86,24 @@ main() {
 	if [[ $build == true ]]; then
 		echo "sam building..."
 
-		echo "run.sh: building the collector..."
-		pushd $collectorPath || exit
-		make package
-		rm build/collector-extension.zip
-		popd || exit
-		rm -rf otel/collector_build/
-		cp -r $collectorPath/build/ otel/collector_build/
-
 		echo "run.sh: Starting sam build."
-		sam build -u -t $template
+		sam build -u -t "$template"
+		zip -qr "$layerName".zip .aws-sam/build
 	fi
 
 	if [[ $deploy == true ]]; then
-		sam deploy --stack-name $stack --region $region --capabilities CAPABILITY_NAMED_IAM --resolve-s3 --parameter-overrides LayerName=$layerName
+		sam deploy --stack-name "$stack" --region "$region" --capabilities CAPABILITY_NAMED_IAM --resolve-s3 --parameter-overrides LayerName="$layerName"
 		rm -rf otel/otel_collector
-		rm -rf .aws-sam
+		rm -f "$layerName".zip
 	fi
 
 	if [[ $layer == true ]]; then
 		echo -e "\nOTel Lambda layer ARN:"
-		arn=$(aws lambda list-layer-versions --layer-name $layerName --region $region --query 'max_by(LayerVersions, &Version).LayerVersionArn')
-		echo $arn | sed 's/\"//g'
+		arn=$(aws lambda list-layer-versions --layer-name "$layerName" --region "$region" --query 'max_by(LayerVersions, &Version).LayerVersionArn')
+		echo "${arn//\"/}"
 	fi
 }
+
+rm -rf .aws-sam
 
 main "$@"

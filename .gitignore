@@ -12,3 +12,10 @@ terraform.*
 
 .DS_Store
 *.whl
+
+.tox
+__pycache__/*
+.pyc
+build.toml
+
+*.zip
