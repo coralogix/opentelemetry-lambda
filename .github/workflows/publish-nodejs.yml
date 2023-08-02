@@ -46,7 +46,7 @@ jobs:
       run: npm install
     - name: Build opentelemetry-instrumentation
       working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/experimental/packages/opentelemetry-instrumentation
-      run: npm install && npm pack
+      run: npm install && npm run compile && npm pack
     - name: Install forked opentelemetry-js-contrib libraries
       working-directory: ./nodejs/packages/layer
       run: >
