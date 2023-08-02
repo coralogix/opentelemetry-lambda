@@ -16,5 +16,6 @@ terraform.*
 .tox
 __pycache__/*
 .pyc
+build.toml
 
 *.zip
