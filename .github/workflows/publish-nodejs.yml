@@ -15,26 +15,45 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ github.ref == 'refs/heads/coralogix-nodejs-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
+    env:
+      OPENTELEMETRY_JS_CONTRIB_PATH: ${{ github.workspace }}/opentelemetry-js-contrib
+      OPENTELEMETRY_JS_PATH: ${{ github.workspace }}/opentelemetry-js
     steps:
     - uses: actions/checkout@v3
     - uses: actions/checkout@v3
       with:
-        path: ./opentelemetry-js-contrib
+        path: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}
         repository: coralogix/opentelemetry-js-contrib
         ref: refs/heads/coralogix-autoinstrumentation
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
-    - name: Generate version files
-      working-directory: ./opentelemetry-js-contrib
+    - uses: actions/checkout@v3
+      with:
+        path: ${{ env.OPENTELEMETRY_JS_PATH }}
+        repository: coralogix/opentelemetry-js
+        ref: refs/heads/coralogix-autoinstrumentation
+        ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
+    - name: Generate version files in opentelemetry-js-contrib
+      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}
       run: lerna run version:update
-    - name: build instrumentation-aws-lambda
-      working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda
+    - name: Build opentelemetry-instrumentation-aws-lambda
+      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-aws-lambda
       run: npm install --ignore-scripts && npm pack --ignore-scripts
-    - name: Build instrumentation-aws-sdk
-      working-directory: ./opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk
+    - name: Build opentelemetry-instrumentation-aws-sdk
+      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-aws-sdk
       run: npm install --ignore-scripts && npm pack --ignore-scripts
+    - name: Prepare opentelemetry-instrumentation
+      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}
+      run: npm install
+    - name: Build opentelemetry-instrumentation
+      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/experimental/packages/opentelemetry-instrumentation
+      run: npm install && npm run compile && npm pack
     - name: Install forked opentelemetry-js-contrib libraries
       working-directory: ./nodejs/packages/layer
-      run: npm install ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz ../../../opentelemetry-js-contrib/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
+      run: >
+        npm install 
+        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz 
+        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
+        ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz
     - name: Install copyfiles and bestzip # used by `npm run compile`
       run: npm install -g copyfiles bestzip
     - name: Build layer
