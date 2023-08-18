@@ -1,0 +1,91 @@
+name: Publish Java
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Actually publish or just test?'
+        type: environment
+        required: true
+        default: test
+
+jobs:
+
+  package:
+    runs-on: ubuntu-22.04
+    if: ${{ github.ref == 'refs/heads/coralogix-java-autoinstrumentation' || inputs.environment == 'test' }}
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK for running Gradle
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+    - uses: gradle/gradle-build-action@v2
+      name: Build Javaagent Layer
+      with:
+        arguments: :layer-javaagent:assemble
+        build-root-directory: java
+    - name: Check layer size
+      env:
+        FILE_PATH: ./java/layer-javaagent/build/distributions/opentelemetry-javaagent-layer.zip
+        MAX_SIZE: 14680064 # 14MB
+      run: ./ci-scripts/check_size.sh
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ vars.SIGNER_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SIGNER_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
+    - name: Upload package to S3
+      run: aws s3 cp ./java/layer-javaagent/build/distributions/opentelemetry-javaagent-layer.zip s3://${{ vars.SIGNER_BUCKET }}/to-be-signed/java-layer.zip
+    - name: Get S3 version of the uploaded file
+      run: |
+        LATEST_VERSION=$(aws s3api list-object-versions --bucket ${{ vars.SIGNER_BUCKET }} --prefix to-be-signed/java-layer.zip --query 'Versions[?IsLatest].[VersionId]' --output text)
+        echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+    - name: Sign the package
+      uses: clowdhaus/aws-lambda-code-signing-action@v1.3.0
+      with:
+        aws-region: ${{ vars.SIGNER_AWS_DEFAULT_REGION }}
+        source-s3-bucket: ${{ vars.SIGNER_BUCKET }}
+        source-s3-key: to-be-signed/java-layer.zip
+        source-s3-version: ${{ env.LATEST_VERSION }}
+        destination-s3-bucket: ${{ vars.SIGNER_BUCKET }}
+        destination-s3-prefix: signed/
+        profile-name: ${{ vars.SIGNER_PROFILE_NAME }}
+        max-wait-time: 60
+        rename-signed-object: true
+    - name: Download the signed package from S3
+      run: aws s3 cp s3://${{ vars.SIGNER_BUCKET }}/signed/java-layer.zip ./layer.zip
+    - name: Upload package
+      uses: actions/upload-artifact@v3
+      with:
+        name: layer.zip
+        path: ./layer.zip
+        if-no-files-found: error
+        retention-days: 1
+
+  publish-layer:
+    runs-on: ubuntu-22.04
+    if: ${{ github.ref == 'refs/heads/coralogix-java-autoinstrumentation' || inputs.environment == 'test' }}
+    needs: [package]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ vars.LAYER_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.LAYER_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.LAYER_AWS_DEFAULT_REGION }}
+    - name: create target dir
+      run: mkdir -p target
+    - name: Download layer.zip
+      uses: actions/download-artifact@v3
+      with:
+        name: layer.zip
+        path: target
+    - name: Publish layer
+      env:
+        LAYER_NAME: "coralogix-opentelemetry-java-wrapper"
+        COMPATIBLE_RUNTIMES: "java8 java8.al2 java11 java17"
+      run: ./ci-scripts/publish_${{ inputs.environment }}.sh
