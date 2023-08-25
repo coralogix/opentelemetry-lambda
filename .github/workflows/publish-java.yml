@@ -22,8 +22,18 @@ jobs:
       with:
         distribution: temurin
         java-version: 17
-    - uses: gradle/gradle-build-action@v2
-      name: Build Javaagent Layer
+    - uses: actions/checkout@v3
+      with:
+        path: ./opentelemetry-java-instrumentation
+        repository: coralogix/opentelemetry-java-instrumentation
+        ref: refs/heads/coralogix-autoinstrumentation
+    - name: Build opentelemetry-java-instrumentation
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: assemble publishToMavenLocal
+        build-root-directory: opentelemetry-java-instrumentation
+    - name: Build Javaagent Layer
+      uses: gradle/gradle-build-action@v2
       with:
         arguments: :layer-javaagent:assemble
         build-root-directory: java
