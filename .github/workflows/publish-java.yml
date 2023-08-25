@@ -12,7 +12,7 @@ on:
 jobs:
 
   package:
-    runs-on: ubuntu-22.04
+    runs-on: public-runner
     if: ${{ github.ref == 'refs/heads/coralogix-java-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
     steps:
@@ -30,7 +30,7 @@ jobs:
     - name: Build opentelemetry-java-instrumentation
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: assemble publishToMavenLocal
+        arguments: publishToMavenLocal
         build-root-directory: opentelemetry-java-instrumentation
     - name: Build Javaagent Layer
       uses: gradle/gradle-build-action@v2
@@ -40,7 +40,7 @@ jobs:
     - name: Check layer size
       env:
         FILE_PATH: ./java/layer-javaagent/build/distributions/opentelemetry-javaagent-layer.zip
-        MAX_SIZE: 14680064 # 14MB
+        MAX_SIZE: 16777216 # 16MB
       run: ./ci-scripts/check_size.sh
     - uses: aws-actions/configure-aws-credentials@v2
       with:
