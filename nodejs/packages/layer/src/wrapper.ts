@@ -60,7 +60,9 @@ function defaultConfigureInstrumentations() {
     new HttpInstrumentation(),
     new IORedisInstrumentation(),
     new KoaInstrumentation(),
-    new MongoDBInstrumentation(),
+    new MongoDBInstrumentation({
+      enhancedDatabaseReporting: true
+    }),
     new MySQLInstrumentation(),
     new NetInstrumentation(),
     new PgInstrumentation({
