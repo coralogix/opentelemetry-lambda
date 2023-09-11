@@ -61,7 +61,7 @@ function defaultConfigureInstrumentations() {
     new IORedisInstrumentation(),
     new KoaInstrumentation(),
     new MongoDBInstrumentation({
-      enhancedDatabaseReporting: true
+      enhancedDatabaseReporting: process.env.MONGO_ENHANCED_REPORTING === 'true'
     }),
     new MySQLInstrumentation(),
     new NetInstrumentation(),
