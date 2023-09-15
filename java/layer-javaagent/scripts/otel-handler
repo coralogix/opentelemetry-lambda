@@ -6,20 +6,35 @@ if [[ $OTEL_RESOURCE_ATTRIBUTES != *"service.name="* ]]; then
   export OTEL_RESOURCE_ATTRIBUTES="service.name=${AWS_LAMBDA_FUNCTION_NAME},${OTEL_RESOURCE_ATTRIBUTES}"
 fi
 
-export OTEL_INSTRUMENTATION_AWS_LAMBDA_FLUSH_TIMEOUT=2000
+if [ -z "$OTEL_INSTRUMENTATION_AWS_LAMBDA_FLUSH_TIMEOUT" ]; then
+  export OTEL_INSTRUMENTATION_AWS_LAMBDA_FLUSH_TIMEOUT=2000
+fi
 
+# disable all instrumentation to reduce startup time
 if [ -z "$OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED" ]; then
-    export OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED="false"
+  export OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED="false"
 fi
 
-if [ -z "$OTEL_INSTRUMENTATION_AWS_LAMBDA_ENABLED" ]; then
-    export OTEL_INSTRUMENTATION_AWS_LAMBDA_ENABLED="true"
+# enable one of two available lambda instrumentations
+if [ -z "$OTEL_INSTRUMENTATION_AWS_LAMBDA_EVENTS_ENABLED" ]; then
+  export OTEL_INSTRUMENTATION_AWS_LAMBDA_EVENTS_ENABLED="true"
 fi
 
+# enable sdk instrumentation (both versions 1.x and 2.x)
 if [ -z "$OTEL_INSTRUMENTATION_AWS_SDK_ENABLED" ]; then
-    export OTEL_INSTRUMENTATION_AWS_SDK_ENABLED="true"
+  export OTEL_INSTRUMENTATION_AWS_SDK_ENABLED="true"
 fi
 
-CMD="$(echo "$@" | sed 's/-Xshare:on/-Xshare:auto/g')"
+# This is necessary to propagete tracecontext to SQS/SNS/Lambda
+if [ -z "$OTEL_INSTRUMENTATION_AWS_SDK_EXPERIMENTAL_USE_PROPAGATOR_FOR_MESSAGING" ]; then
+  export OTEL_INSTRUMENTATION_AWS_SDK_EXPERIMENTAL_USE_PROPAGATOR_FOR_MESSAGING="true"
+fi
+
+# Use tracecontext when propagating to SQS/SNS/Lambda
+if [ -z "$OTEL_PROPAGATORS" ]; then
+  export OTEL_PROPAGATORS="tracecontext"
+fi
+
+CMD="${AAA//-Xshare:on/-Xshare:auto}"
 
 exec $CMD
