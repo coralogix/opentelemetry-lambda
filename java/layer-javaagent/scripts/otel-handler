@@ -35,6 +35,7 @@ if [ -z "$OTEL_PROPAGATORS" ]; then
   export OTEL_PROPAGATORS="tracecontext"
 fi
 
+# shellcheck disable=SC2001 # Fixing the shellcheck warning breaks things
 CMD="$(echo "$@" | sed 's/-Xshare:on/-Xshare:auto/g')"
 
 exec $CMD
