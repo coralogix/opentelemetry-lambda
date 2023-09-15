@@ -35,6 +35,6 @@ if [ -z "$OTEL_PROPAGATORS" ]; then
   export OTEL_PROPAGATORS="tracecontext"
 fi
 
-CMD="$(echo "$@" | sed 's/-Xshare:on/-Xshare:auto/g')"
+CMD="${AAA//-Xshare:on/-Xshare:auto}"
 
 exec $CMD
