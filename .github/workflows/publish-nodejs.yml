@@ -24,7 +24,7 @@ jobs:
       with:
         path: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}
         repository: coralogix/opentelemetry-js-contrib
-        ref: refs/heads/coralogix-autoinstrumentation
+        ref: refs/heads/chore/link-propagation
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
     - uses: actions/checkout@v3
       with:
