@@ -47,6 +47,9 @@ jobs:
     - name: Build opentelemetry-instrumentation
       working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/experimental/packages/opentelemetry-instrumentation
       run: npm install && npm run compile && npm pack
+    - name: Build opentelemetry-sdk-trace-base
+      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/packages/opentelemetry-sdk-trace-base
+      run: npm install && npm run compile && npm pack
     - name: Install forked opentelemetry-js-contrib libraries
       working-directory: ./nodejs/packages/layer
       run: >
@@ -54,6 +57,7 @@ jobs:
         ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz 
         ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
         ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz
+        ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz
     - name: Install copyfiles and bestzip # used by `npm run compile`
       run: npm install -g copyfiles bestzip
     - name: Build layer
