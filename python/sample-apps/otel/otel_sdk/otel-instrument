@@ -89,10 +89,9 @@ export PYTHONPATH="$LAMBDA_RUNTIME_DIR:$PYTHONPATH";
 
 # - Set the trace exporter
 
-if [ -z ${OTEL_TRACES_EXPORTER} ]; then
-    export OTEL_TRACES_EXPORTER=otlp_proto_http;
+if [ -z "${OTEL_EXPORTER_OTLP_PROTOCOL}" ]; then
+    export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 fi
-
 # - Set the metrics exporter
 
 if [ -z ${OTEL_METRICS_EXPORTER} ]; then
