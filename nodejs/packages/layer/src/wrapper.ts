@@ -153,7 +153,7 @@ const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
   disableAwsContextPropagation: true,
   eventContextExtractor: (event, context) => {
     // try to extract propagation from http headers first
-    const httpHeaders = event.headers || {};
+    const httpHeaders = event?.headers || {};
     const extractedHttpContext: OtelContext = propagation.extract(
       otelContext.active(),
       httpHeaders,
