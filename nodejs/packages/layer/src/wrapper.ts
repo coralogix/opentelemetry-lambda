@@ -201,6 +201,7 @@ const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
     }
     return otelContext.active();
   },
+  payloadSizeLimit: OTEL_PAYLOAD_SIZE_LIMIT,
 };
 
 const instrumentations = [
