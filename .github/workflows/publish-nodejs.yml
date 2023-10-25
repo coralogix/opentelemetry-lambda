@@ -38,6 +38,9 @@ jobs:
     - name: Build opentelemetry-instrumentation-aws-lambda
       working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-aws-lambda
       run: npm install --ignore-scripts && npm pack --ignore-scripts
+    - name: Build opentelemetry-instrumentation-mongodb
+      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-mongodb
+      run: npm install --ignore-scripts && npm pack --ignore-scripts
     - name: Build opentelemetry-instrumentation-aws-sdk
       working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-aws-sdk
       run: npm install --ignore-scripts && npm pack --ignore-scripts
@@ -51,7 +54,8 @@ jobs:
       working-directory: ./nodejs/packages/layer
       run: >
         npm install 
-        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz 
+        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/coralogix-instrumentation-aws-lambda-*.tgz
+        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz
         ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/coralogix-instrumentation-aws-sdk-*.tgz
         ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz
     - name: Install copyfiles and bestzip # used by `npm run compile`
