@@ -127,5 +127,5 @@ jobs:
     - name: Publish layer
       env:
         LAYER_NAME: "coralogix-opentelemetry-nodejs-wrapper"
-        COMPATIBLE_RUNTIMES: "nodejs14.x nodejs16.x nodejs18.x"
+        COMPATIBLE_RUNTIMES: "nodejs16.x nodejs18.x"
       run: ./ci-scripts/publish_${{ inputs.environment }}.sh
