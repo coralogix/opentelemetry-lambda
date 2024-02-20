@@ -97,5 +97,5 @@ jobs:
     - name: Publish layer
       env:
         LAYER_NAME: "coralogix-opentelemetry-java-wrapper"
-        COMPATIBLE_RUNTIMES: "java8 java8.al2 java11 java17"
+        COMPATIBLE_RUNTIMES: "java8.al2 java11 java17 java21"
       run: ./ci-scripts/publish_${{ inputs.environment }}.sh
