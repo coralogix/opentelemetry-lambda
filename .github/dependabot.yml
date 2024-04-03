@@ -1,23 +1,82 @@
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
   - package-ecosystem: "gomod"
     directory: "/collector"
     schedule:
       interval: "weekly"
+    groups:
+      opentelemetry-deps-collector:
+        patterns:
+          - "*opentelemetry*"
+      other:
+        patterns:
+          - "*"
+  - package-ecosystem: "gomod"
+    directory: "/collector/lambdacomponents"
+    schedule:
+      interval: "weekly"
+    groups:
+      opentelemetry-deps-lambdacomponents:
+        patterns:
+          - "*opentelemetry*"
+      other:
+        patterns:
+          - "*"
   - package-ecosystem: "gradle"
     directory: "/java"
     schedule:
       interval: "weekly"
+    groups:
+      opentelemetry-deps-java:
+        patterns:
+          - "io.opentelemetry.*"
+      amazon-deps:
+        patterns:
+          - "*amazon*"
+      other:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/nodejs"
     schedule:
       interval: "weekly"
-    rebase-strategy: "auto"
-  - package-ecosystem: "pip"
-    directory: "/python/src/otel/otel_sdk"
+  - package-ecosystem: "npm"
+    directory: "/nodejs/packages/layer"
     schedule:
       interval: "weekly"
+    groups:
+      opentelemetry-deps-nodejs:
+        patterns:
+          - "@opentelemetry/*"
+      other:
+        patterns:
+          - "*"
+  - package-ecosystem: "pip"
+    directory: "/python/src/otel"
+    schedule:
+      interval: "weekly"
+    groups:
+      opentelemetry-deps-python:
+        patterns:
+          - "opentelemetry-*"
+  - package-ecosystem: "bundler"
+    directory: "/ruby/src/layer"
+    schedule:
+      interval: "weekly"
+    groups:
+      opentelemetry-deps-ruby:
+        patterns:
+          - "opentelemetry-*"
+      other:
+        patterns:
+          - "*"
