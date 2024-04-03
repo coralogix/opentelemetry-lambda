@@ -15,8 +15,8 @@ import {
   envDetector,
   processDetector,
 } from '@opentelemetry/resources';
-import { AwsInstrumentation } from '@coralogix/instrumentation-aws-sdk';
-import { AwsLambdaInstrumentation } from '@coralogix/instrumentation-aws-lambda';
+import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
+import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda';
 import {
   context as otelContext,
   defaultTextMapGetter,
@@ -29,7 +29,7 @@ import {
   trace,
 } from '@opentelemetry/api';
 import { getEnv } from '@opentelemetry/core';
-import { AwsLambdaInstrumentationConfig } from '@coralogix/instrumentation-aws-lambda';
+import { AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 
