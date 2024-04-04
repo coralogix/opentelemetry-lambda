@@ -27,6 +27,7 @@ import {
   propagation,
   Span,
   trace,
+  metrics,
 } from '@opentelemetry/api';
 import { getEnv } from '@opentelemetry/core';
 import { AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
@@ -312,6 +313,7 @@ async function initializeProvider() {
   if (typeof configureMeterProvider === 'function') {
     configureMeterProvider(meterProvider)
   }
+  metrics.setGlobalMeterProvider(meterProvider);
 
   // Re-register instrumentation with initialized provider. Patched code will see the update.
   registerInstrumentations({
