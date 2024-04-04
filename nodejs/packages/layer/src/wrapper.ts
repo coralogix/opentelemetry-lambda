@@ -27,13 +27,15 @@ import {
   propagation,
   Span,
   trace,
+  metrics,
 } from '@opentelemetry/api';
 import { getEnv } from '@opentelemetry/core';
 import { AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 
-import { MeterProvider, MeterProviderOptions } from '@opentelemetry/sdk-metrics';
+import { MeterProvider, MeterProviderOptions, PeriodicExportingMetricReader, AggregationTemporality } from '@opentelemetry/sdk-metrics';
 
 
 function defaultConfigureInstrumentations() {
@@ -124,6 +126,7 @@ const OtelAttributes = {
 };
 
 const DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT = 50 * 1024;
+const DEFAULT_OTEL_EXPORT_TIMEOUT = 2000; // this is a localhost call, and we don't want to block the function for too long
 
 const parseIntEnvvar = (envName: string): number | undefined => {
   const envVar = process.env?.[envName];
@@ -243,6 +246,9 @@ registerInstrumentations({
 });
 
 async function initializeProvider() {
+
+  const export_timeout = parseIntEnvvar("OTEL_EXPORT_TIMEOUT") ?? DEFAULT_OTEL_EXPORT_TIMEOUT;
+
   const resource = detectResourcesSync({
     detectors: [awsLambdaDetector, envDetector, processDetector],
   });
@@ -266,7 +272,9 @@ async function initializeProvider() {
     // defaults
   */
   tracerProvider.addSpanProcessor(
-    new BatchSpanProcessor(new OTLPTraceExporter())
+    new BatchSpanProcessor(new OTLPTraceExporter({
+      timeoutMillis: export_timeout,
+    }))
   );
   /*
   }
@@ -284,9 +292,18 @@ async function initializeProvider() {
   }
   tracerProvider.register(sdkRegistrationConfig);
 
-  // Configure default meter provider (doesn't export metrics)
+  // Configure default meter provider
+
+  const metricExporter = new OTLPMetricExporter({
+    timeoutMillis: export_timeout,
+    temporalityPreference: AggregationTemporality.CUMULATIVE,
+  });
+
   let meterConfig: MeterProviderOptions = {
     resource,
+    readers: [new PeriodicExportingMetricReader({
+      exporter: metricExporter,
+    })]
   }
   if (typeof configureMeter === 'function') {
     meterConfig = configureMeter(meterConfig);
@@ -296,6 +313,7 @@ async function initializeProvider() {
   if (typeof configureMeterProvider === 'function') {
     configureMeterProvider(meterProvider)
   }
+  metrics.setGlobalMeterProvider(meterProvider);
 
   // Re-register instrumentation with initialized provider. Patched code will see the update.
   registerInstrumentations({
