@@ -96,7 +96,7 @@ fi
 # - Set the metrics exporter
 
 if [ -z "${OTEL_METRICS_EXPORTER}" ]; then
-    export OTEL_METRICS_EXPORTER=none;
+    export OTEL_METRICS_EXPORTER=otlp_proto_http;
 fi
 
 # - Set the service name
