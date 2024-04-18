@@ -25,6 +25,11 @@ if [ -z "$OTEL_INSTRUMENTATION_AWS_SDK_ENABLED" ]; then
   export OTEL_INSTRUMENTATION_AWS_SDK_ENABLED="true"
 fi
 
+# enable opentelemetry api instrumentation so function can access the GlobalOpenTelemetry set up by the agent
+if [ -z "$OTEL_INSTRUMENTATION_OPENTELEMETRY_API_ENABLED" ]; then
+  export OTEL_INSTRUMENTATION_OPENTELEMETRY_API_ENABLED="true"
+fi
+
 # This is necessary to propagete tracecontext to SQS/SNS/Lambda
 if [ -z "$OTEL_INSTRUMENTATION_AWS_SDK_EXPERIMENTAL_USE_PROPAGATOR_FOR_MESSAGING" ]; then
   export OTEL_INSTRUMENTATION_AWS_SDK_EXPERIMENTAL_USE_PROPAGATOR_FOR_MESSAGING="true"
