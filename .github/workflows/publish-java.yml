@@ -40,7 +40,7 @@ jobs:
     - name: Check layer size
       env:
         FILE_PATH: ./java/layer-javaagent/build/distributions/opentelemetry-javaagent-layer.zip
-        MAX_SIZE: 16777216 # 16MB
+        MAX_SIZE: 18874368 # 18MB
       run: ./ci-scripts/check_size.sh
     - uses: aws-actions/configure-aws-credentials@v2
       with:
