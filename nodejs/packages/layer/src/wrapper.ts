@@ -1,3 +1,7 @@
+import { register } from "node:module"; 
+import { pathToFileURL } from "node:url"; 
+register("@opentelemetry/instrumentation/hook.mjs", pathToFileURL("./"));
+
 import {
   NodeTracerConfig,
   NodeTracerProvider,
@@ -37,6 +41,9 @@ import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 
 import { MeterProvider, MeterProviderOptions, PeriodicExportingMetricReader, AggregationTemporality } from '@opentelemetry/sdk-metrics';
 
+// configure lambda logging
+const logLevel = getEnv().OTEL_LOG_LEVEL;
+diag.setLogger(new DiagConsoleLogger(), logLevel);
 
 function defaultConfigureInstrumentations() {
   // Use require statements for instrumentation to avoid having to have transitive dependencies on all the typescript
@@ -235,10 +242,6 @@ const instrumentations = [
   new AwsLambdaInstrumentation(typeof configureLambdaInstrumentation === 'function' ? configureLambdaInstrumentation(lambdaAutoInstrumentConfig) : lambdaAutoInstrumentConfig),
   ...(typeof configureInstrumentations === 'function' ? configureInstrumentations: defaultConfigureInstrumentations)()
 ];
-
-// configure lambda logging
-const logLevel = getEnv().OTEL_LOG_LEVEL;
-diag.setLogger(new DiagConsoleLogger(), logLevel);
 
 // Register instrumentations synchronously to ensure code is patched even before provider is ready.
 registerInstrumentations({
