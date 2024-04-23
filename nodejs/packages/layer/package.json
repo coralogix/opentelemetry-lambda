@@ -51,6 +51,12 @@
     "@opentelemetry/resources": "1.22.0",
     "@opentelemetry/sdk-metrics": "1.22.0",
     "@opentelemetry/sdk-trace-base": "file:../../../../../oss/opentelemetry-js/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-1.22.0.tgz",
-    "@opentelemetry/sdk-trace-node": "1.22.0"
+    "@opentelemetry/sdk-trace-node": "1.22.0",
+    "import-in-the-middle": "file:../../../../import-in-the-middle/import-in-the-middle-1.7.3.tgz"
+  },
+  "overrides": {
+    "@opentelemetry/instrumentation": {
+      "import-in-the-middle": "$import-in-the-middle"
+    }
   }
 }

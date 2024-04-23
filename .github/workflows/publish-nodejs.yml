@@ -18,6 +18,7 @@ jobs:
     env:
       OPENTELEMETRY_JS_CONTRIB_PATH: ${{ github.workspace }}/opentelemetry-js-contrib
       OPENTELEMETRY_JS_PATH: ${{ github.workspace }}/opentelemetry-js
+      IITM_PATH: ${{ github.workspace }}/import-in-the-middle
     steps:
     - uses: actions/checkout@v3
     - uses: actions/checkout@v3
@@ -32,56 +33,14 @@ jobs:
         repository: coralogix/opentelemetry-js
         ref: refs/heads/coralogix-autoinstrumentation
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
-    - name: Generate version files in opentelemetry-js-contrib
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}
-      run: npx lerna@6.6.2 run version:update # Newer versions have trouble with our lerna.json which contains `useWorkspaces`
-    - name: Prepare opentelemetry-js-contrib
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}
-      run: npm install
-    - name: Build opentelemetry-test-utils
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/packages/opentelemetry-test-utils
-      run: npm install && npm run compile
-    - name: Build opentelemetry-propagator-aws-xray
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/propagators/opentelemetry-propagator-aws-xray
-      run: npm install && npm run compile
-    - name: Build opentelemetry-propagation-utils
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/packages/opentelemetry-propagation-utils
-      run: npm install && npm run compile
-    - name: Build opentelemetry-instrumentation-aws-lambda
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-aws-lambda
-      run: npm install --ignore-scripts && npm run compile && npm pack --ignore-scripts
-    - name: Build opentelemetry-instrumentation-mongodb
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-mongodb
-      run: npm install --ignore-scripts && npm run compile && npm pack --ignore-scripts
-    - name: Build opentelemetry-instrumentation-aws-sdk
-      working-directory: ${{ env.OPENTELEMETRY_JS_CONTRIB_PATH }}/plugins/node/opentelemetry-instrumentation-aws-sdk
-      run: npm install --ignore-scripts && npm run compile && npm pack --ignore-scripts
-    - name: Prepare opentelemetry-js
-      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}
-      run: npm install
-    - name: Build sdk-logs
-      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/experimental/packages/sdk-logs
-      run: npm install && npm run compile
-    - name: Build opentelemetry-instrumentation
-      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/experimental/packages/opentelemetry-instrumentation
-      run: npm install && npm run compile && npm pack
-    - name: Build opentelemetry-sdk-trace-base
-      working-directory: ${{ env.OPENTELEMETRY_JS_PATH }}/packages/opentelemetry-sdk-trace-base
-      run: npm install && npm run compile && npm pack
-    - name: Install forked opentelemetry-js/opentelemetry-js-contrib libraries
-      working-directory: ./nodejs/packages/layer
-      run: >
-        npm install 
-        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz
-        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz
-        ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz
-        ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz
-        ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz
-    - name: Install copyfiles and bestzip # used by `npm run compile`
-      run: npm install -g copyfiles bestzip
-    - name: Build layer
-      working-directory: ./nodejs/packages/layer
-      run: npm install && npm run compile
+    - uses: actions/checkout@v3
+      with:
+        path: ${{ env.IITM_PATH }}
+        repository: coralogix/import-in-the-middle
+        ref: refs/heads/coralogix-autoinstrumentation
+        ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
+    - name: Build
+      run: ./ci-scripts/build_nodejs_layer.hs
     - name: Check layer size
       env:
         FILE_PATH: ./nodejs/packages/layer/build/layer.zip
