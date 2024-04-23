@@ -1,8 +1,10 @@
 #!/bin/bash
-MJS_FILE="${LAMBDA_TASK_ROOT}/${_HANDLER%.*}.mjs"
 
-# If it's an mjs file, then we enable the hook for node modules loading
-if [ -f "${DIR_PATH}" ]; then
+echo "LAMBDA_TASK_ROOT=${LAMBDA_TASK_ROOT}"
+echo "_HANDLER=${_HANDLER}"
+
+# If the handler is in an .mjs file we need to use a loader hook. We can't detect it here because the corresponding env vars are not available at this point
+if [ "$OTEL_NODEJS_HOOK" == "modules" ]; then
     export NODE_OPTIONS="${NODE_OPTIONS} --experimental-loader=@opentelemetry/instrumentation/hook.mjs"
     # Disable node warnings caused by --experimental-loader
     export NODE_NO_WARNINGS=1
