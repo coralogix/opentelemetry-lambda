@@ -38,7 +38,7 @@ jobs:
         path: ${{ env.IITM_PATH }}
         repository: coralogix/import-in-the-middle
         ref: refs/heads/coralogix-autoinstrumentation
-        ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
+        ssh-key: ${{ secrets.OPENTELEMETRY_CI_IITM_GITHUB_KEY }}
     - name: Build
       run: ./ci-scripts/build_nodejs_layer.hs
     - name: Check layer size
