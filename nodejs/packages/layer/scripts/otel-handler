@@ -3,8 +3,9 @@ MJS_FILE="${LAMBDA_TASK_ROOT}/${_HANDLER%.*}.mjs"
 
 # If it's an mjs file, then we enable the hook for node modules loading
 if [ -f "${DIR_PATH}" ]; then
-    # If the file exists, export NODE_OPTIONS
     export NODE_OPTIONS="${NODE_OPTIONS} --experimental-loader=@opentelemetry/instrumentation/hook.mjs"
+    # Disable node warnings caused by --experimental-loader
+    export NODE_NO_WARNINGS=1
 fi
 
 export NODE_OPTIONS="${NODE_OPTIONS} --require /opt/wrapper.js"
