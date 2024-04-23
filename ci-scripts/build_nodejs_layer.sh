@@ -98,7 +98,7 @@ npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
-    ${IITM_PATH}/import-in-the-middle-*.tgz \
+    ${IITM_PATH}/import-in-the-middle-*.tgz
 popd > /dev/null
 
 # Install copyfiles and bestzip # used by `npm run compile`
