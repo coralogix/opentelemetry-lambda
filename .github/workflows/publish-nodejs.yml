@@ -40,7 +40,7 @@ jobs:
         ref: refs/heads/coralogix-autoinstrumentation
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_IITM_GITHUB_KEY }}
     - name: Build
-      run: ./ci-scripts/build_nodejs_layer.hs
+      run: ./ci-scripts/build_nodejs_layer.sh
     - name: Check layer size
       env:
         FILE_PATH: ./nodejs/packages/layer/build/layer.zip
