@@ -1,10 +1,6 @@
 #!/bin/bash
 
-echo "LAMBDA_TASK_ROOT=${LAMBDA_TASK_ROOT}"
-echo "_HANDLER=${_HANDLER}"
-
 possible_mjs_handler_file="${LAMBDA_TASK_ROOT}/${_HANDLER%.*}.mjs"
-echo "possible_mjs_handler_file=${possible_mjs_handler_file}"
 
 # If the handler is in an .mjs file we need to use a loader hook. We can't detect it here because the corresponding env vars are not available at this point
 if [ "$OTEL_NODEJS_HOOK" == "modules" ] || [ -f "$possible_mjs_handler_file" ]; then
