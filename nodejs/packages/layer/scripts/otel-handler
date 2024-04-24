@@ -1,5 +1,14 @@
 #!/bin/bash
 
+possible_mjs_handler_file="${LAMBDA_TASK_ROOT}/${_HANDLER%.*}.mjs"
+
+# If the handler is in an .mjs file we need to use a loader hook. We can't detect it here because the corresponding env vars are not available at this point
+if [ "$OTEL_NODEJS_HOOK" == "modules" ] || [ -f "$possible_mjs_handler_file" ]; then
+    export NODE_OPTIONS="${NODE_OPTIONS} --experimental-loader=@opentelemetry/instrumentation/hook.mjs"
+    # Disable node warnings caused by --experimental-loader
+    export NODE_NO_WARNINGS=1
+fi
+
 export NODE_OPTIONS="${NODE_OPTIONS} --require /opt/wrapper.js"
 
 if [[ $OTEL_RESOURCE_ATTRIBUTES != *"service.name="* ]]; then
