@@ -16,6 +16,6 @@ if [[ $OTEL_RESOURCE_ATTRIBUTES != *"service.name="* ]]; then
 fi
 
 export CX_ORIGINAL_HANDLER="${_HANDLER}"
-export _HANDLER="${MAGIC_HANDLER}"
+export _HANDLER="cx-wrapper.handler"
 
 exec "$@"

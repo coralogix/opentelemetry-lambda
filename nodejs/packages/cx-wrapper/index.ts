@@ -4,7 +4,7 @@ import {
   Callback,
   Context,
 } from 'aws-lambda';
-
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda';
 import {
   context as otelContext,
@@ -14,7 +14,6 @@ import {
   propagation,
   trace,
 } from '@opentelemetry/api';
-
 import { AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
 import {Handler} from "aws-lambda/handler";
 
@@ -100,17 +99,36 @@ const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
 
 const instrumentation = new AwsLambdaInstrumentation(lambdaAutoInstrumentConfig)
 
+registerInstrumentations({instrumentations: [instrumentation]})
+
 if (process.env.CX_ORIGINAL_HANDLER === undefined)
   throw Error('CX_ORIGINAL_HANDLER is missing');
 
-export const handler = async (event: any, context: Context, callback: Callback) => {
-  console.log(`Running custom CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`)
 
-  const originalHandler = await load(
+
+export const handler = (event: any, context: Context, callback: Callback) => {
+  // console.log(`Running custom CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`)
+  load(
     process.env.LAMBDA_TASK_ROOT,
     process.env.CX_ORIGINAL_HANDLER
+  ).then(
+    originalHandler => {
+      const patchedHandler = instrumentation.getPatchHandler(originalHandler) as any as Handler;
+      const maybePromise = patchedHandler(event, context, callback);
+      // console.log("patchedHandler completed")
+      if (typeof maybePromise?.then === 'function') {
+        maybePromise.then(
+          value => {
+            callback(null, value)
+          },
+          (err: Error | string) => {
+            callback(err, null)
+          }
+        );
+      }
+    },
+    (err: Error | string) => {
+      callback(err, null)
+    }
   );
-
-  const patchedHandler = instrumentation.getPatchHandler(originalHandler) as any as Handler;
-  patchedHandler(event, context, callback)
 }
