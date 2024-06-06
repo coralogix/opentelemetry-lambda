@@ -9,10 +9,18 @@ if [ "$OTEL_NODEJS_HOOK" == "modules" ] || [ -f "$possible_mjs_handler_file" ]; 
     export NODE_NO_WARNINGS=1
 fi
 
-export NODE_OPTIONS="${NODE_OPTIONS} --require /opt/wrapper.js"
-
 if [[ $OTEL_RESOURCE_ATTRIBUTES != *"service.name="* ]]; then
   export OTEL_RESOURCE_ATTRIBUTES="service.name=${AWS_LAMBDA_FUNCTION_NAME},${OTEL_RESOURCE_ATTRIBUTES}"
+fi
+
+export CX_ORIGINAL_HANDLER="${_HANDLER}"
+
+if [ "$AWS_EXECUTION_ENV" == "AWS_Lambda_nodejs16.x" ]; then
+  # nodejs16.x has a bug preventing loading ES modules from layers. We need a fallback solution which results in worse performance.
+  export _HANDLER="cx-wrapper-16.handler"
+else
+  # newer nodejs runtimes can load ES modules from layers, which enables us to use top-level-await and load handler during lambda init phase
+  export _HANDLER="cx-wrapper.handler"
 fi
 
 exec "$@"
