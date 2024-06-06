@@ -22,6 +22,8 @@ fi
 
 IITM_PATH=$(realpath $IITM_PATH)
 
+CWD=$(pwd)
+
 pushd $OPENTELEMETRY_JS_CONTRIB_PATH > /dev/null
 # Generate version files in opentelemetry-js-contrib
 npx lerna@6.6.2 run version:update # Newer versions have trouble with our lerna.json which contains `useWorkspaces`
@@ -115,7 +117,7 @@ npm install \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
     ${IITM_PATH}/import-in-the-middle-*.tgz \
-    ./nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
+    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
 popd > /dev/null
 
 # Install copyfiles and bestzip # used by `npm run compile`

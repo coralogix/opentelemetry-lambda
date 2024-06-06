@@ -16,17 +16,17 @@ import {
   processDetector,
 } from '@opentelemetry/resources';
 import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
-import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda';
+// import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda';
 import {
-  context as otelContext,
-  defaultTextMapGetter,
-  Context as OtelContext,
+  // context as otelContext,
+  // defaultTextMapGetter,
+  // Context as OtelContext,
   diag,
   DiagConsoleLogger,
   DiagLogLevel,
-  propagation,
+  // propagation,
   Span,
-  trace,
+  // trace,
   metrics,
 } from '@opentelemetry/api';
 import { getEnv } from '@opentelemetry/core';
