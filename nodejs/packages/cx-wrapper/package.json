@@ -1,16 +1,15 @@
 {
-  "name": "@opentelemetry-lambda/sdk-layer",
+  "name": "cx-wrapper",
   "version": "0.0.1",
   "private": true,
-  "description": "Layer including OpenTelemetry SDK for use with AWS Lambda.",
-  "repository": "open-telemetry/opentelemetry-lambda",
+  "description": "",
+  "repository": "",
   "scripts": {
     "clean": "rimraf build/*",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts",
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts --fix",
     "prepare": "npm run compile",
-    "compile": "tsc -p .",
-    "postcompile": "copyfiles 'node_modules/**' build/workspace/nodejs && copyfiles -f 'scripts/*' build/workspace && copyfiles -f 'build/src/*' build/workspace && cd build/workspace && bestzip ../layer.zip *"
+    "compile": "tsc -p ."
   },
   "keywords": [
     "opentelemetry",
@@ -20,11 +19,15 @@
     "profiling",
     "instrumentation"
   ],
-  "author": "OpenTelemetry Authors",
-  "license": "Apache-2.0",
   "engines": {
     "node": ">=16.0.0"
   },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "*.map",
+    "package.json"
+  ],
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/core": "1.22.0",
@@ -52,7 +55,6 @@
     "@opentelemetry/sdk-metrics": "1.22.0",
     "@opentelemetry/sdk-trace-base": "file:../../../../../oss/opentelemetry-js/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-1.22.0.tgz",
     "@opentelemetry/sdk-trace-node": "1.22.0",
-    "cx-wrapper": "file:../cx-wrapper/cx-wrapper-0.0.1.tgz",
     "import-in-the-middle": "file:../../../../import-in-the-middle/import-in-the-middle-1.7.3.tgz"
   },
   "overrides": {
