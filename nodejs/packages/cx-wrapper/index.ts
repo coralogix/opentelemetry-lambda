@@ -3,7 +3,6 @@ import { load } from './aws/aws-user-function.js';
 import {
   Callback,
   Context,
-  Handler,
 } from 'aws-lambda';
 
 import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda';
@@ -12,15 +11,12 @@ import {
   defaultTextMapGetter,
   Context as OtelContext,
   diag,
-  DiagConsoleLogger,
-  DiagLogLevel,
   propagation,
-  Span,
   trace,
-  metrics,
 } from '@opentelemetry/api';
 
 import { AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
+import {Handler} from "aws-lambda/handler";
 
 const parseIntEnvvar = (envName: string): number | undefined => {
   const envVar = process.env?.[envName];
@@ -30,7 +26,7 @@ const parseIntEnvvar = (envName: string): number | undefined => {
   return numericEnvvar;
 };
 
-const RPC_REQUEST_PAYLOAD: 'rpc.request.payload';
+const RPC_REQUEST_PAYLOAD = 'rpc.request.payload';
 const DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT = 50 * 1024;
 const OTEL_PAYLOAD_SIZE_LIMIT: number =
   parseIntEnvvar('OTEL_PAYLOAD_SIZE_LIMIT') ?? DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT;
@@ -115,6 +111,6 @@ export const handler = async (event: any, context: Context, callback: Callback) 
     process.env.CX_ORIGINAL_HANDLER
   );
 
-  const patchedHandler = instrumentation.getPatchHandler(originalHandler)
+  const patchedHandler = instrumentation.getPatchHandler(originalHandler) as any as Handler;
   patchedHandler(event, context, callback)
 }
