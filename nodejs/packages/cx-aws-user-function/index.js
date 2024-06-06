@@ -15,7 +15,7 @@ const {
   MalformedHandlerName,
   ImportModuleError,
   UserCodeSyntaxError
-} = require("./Errors.cjs");
+} = require("./Errors.js");
 const path = require("path");
 const fs = require("fs");
 const FUNCTION_EXPR = /^([^.]*)\.(.*)$/;

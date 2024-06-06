@@ -92,6 +92,11 @@ rm -f import-in-the-middle-*.tgz
 npm install && npm pack
 popd > /dev/null
 
+pushd ./nodejs/packages/cx-aws-user-function
+rm -f cx-aws-user-function-*.tgz
+npm install && npm pack
+popd > /dev/null
+
 pushd ./nodejs/packages/cx-wrapper
 npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
@@ -99,7 +104,8 @@ npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
-    ${IITM_PATH}/import-in-the-middle-*.tgz
+    ${IITM_PATH}/import-in-the-middle-*.tgz \
+    ${CWD}/nodejs/packages/cx-aws-user-function/cx-aws-user-function-*.tgz
 popd > /dev/null
 
 # Build import-in-the-middle
@@ -117,6 +123,7 @@ npm install \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
     ${IITM_PATH}/import-in-the-middle-*.tgz \
+    ${CWD}/nodejs/packages/cx-aws-user-function/cx-aws-user-function-*.tgz \
     ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
 popd > /dev/null
 

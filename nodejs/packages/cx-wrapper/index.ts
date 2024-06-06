@@ -1,5 +1,5 @@
 
-import { load } from './aws/aws-user-function.js';
+import { load } from 'cx-aws-user-function';
 import {
   Callback,
   Context,
