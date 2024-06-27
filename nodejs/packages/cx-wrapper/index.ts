@@ -159,7 +159,7 @@ const instrumentations = [
   ...(typeof configureInstrumentations === 'function' ? configureInstrumentations: defaultConfigureInstrumentations)()
 ];
 
-console.log('Registering OpenTelemetry');
+diag.debug('Registering OpenTelemetry instrumentations');
 
 // Register instrumentations synchronously to ensure code is patched even before provider is ready.
 registerInstrumentations({
@@ -244,6 +244,7 @@ async function initializeProvider() {
   });
 }
 
+diag.debug('Initializing OpenTelemetry providers');
 initializeProvider();
 
 const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
@@ -313,7 +314,8 @@ const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
   payloadSizeLimit: OTEL_PAYLOAD_SIZE_LIMIT,
 };
 
-// TODO consider not treating is as an instrumentation
+diag.debug('Instrumenting handler function');
+// TODO consider not treating it as an instrumentation
 const instrumentation = new AwsLambdaInstrumentation(typeof configureLambdaInstrumentation === 'function' ? configureLambdaInstrumentation(lambdaAutoInstrumentConfig) : lambdaAutoInstrumentConfig)
 
 registerInstrumentations({instrumentations: [instrumentation]})
@@ -347,3 +349,5 @@ export const handler = (event: any, context: Context, callback: Callback) => {
     }
   );
 }
+
+diag.debug('OpenTelemetry instrumentation is ready');
