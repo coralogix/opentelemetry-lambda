@@ -131,6 +131,8 @@ const parseIntEnvvar = (envName: string): number | undefined => {
 const OTEL_PAYLOAD_SIZE_LIMIT: number =
   parseIntEnvvar('OTEL_PAYLOAD_SIZE_LIMIT') ?? DEFAULT_OTEL_PAYLOAD_SIZE_LIMIT;
 
+diag.debug('Initializing OpenTelemetry instrumentations');
+
 const instrumentations = [
   new AwsInstrumentation({
     suppressInternalInstrumentation: true,
@@ -159,12 +161,12 @@ const instrumentations = [
   ...(typeof configureInstrumentations === 'function' ? configureInstrumentations: defaultConfigureInstrumentations)()
 ];
 
-diag.debug('Registering OpenTelemetry instrumentations');
-
 // Register instrumentations synchronously to ensure code is patched even before provider is ready.
 registerInstrumentations({
   instrumentations,
 });
+
+diag.debug('Initializing OpenTelemetry providers');
 
 async function initializeProvider() {
 
@@ -244,8 +246,9 @@ async function initializeProvider() {
   });
 }
 
-diag.debug('Initializing OpenTelemetry providers');
 initializeProvider();
+
+diag.debug('Instrumenting handler function');
 
 const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
   requestHook: (span, { event }) => {
@@ -314,7 +317,6 @@ const lambdaAutoInstrumentConfig: AwsLambdaInstrumentationConfig = {
   payloadSizeLimit: OTEL_PAYLOAD_SIZE_LIMIT,
 };
 
-diag.debug('Instrumenting handler function');
 // TODO consider not treating it as an instrumentation
 const instrumentation = new AwsLambdaInstrumentation(typeof configureLambdaInstrumentation === 'function' ? configureLambdaInstrumentation(lambdaAutoInstrumentConfig) : lambdaAutoInstrumentConfig)
 
