@@ -9,7 +9,7 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts",
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts --fix",
     "prepare": "npm run compile",
-    "compile": "touch build/dummy",
+    "compile": "echo compiling nothing",
     "postcompile": "copyfiles 'node_modules/**' build/workspace/nodejs && copyfiles -f 'scripts/*' build/workspace && copyfiles -f 'build/src/*' build/workspace && cd build/workspace && bestzip ../layer.zip *"
   },
   "keywords": [
