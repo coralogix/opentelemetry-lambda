@@ -1,11 +1,16 @@
+import { diag, DiagConsoleLogger } from '@opentelemetry/api';
+import { getEnv } from '@opentelemetry/core';
+
+// configure lambda logging (before we load libraries that might log)
+const logLevel = getEnv().OTEL_LOG_LEVEL;
+diag.setLogger(new DiagConsoleLogger(), logLevel);
+
 import { Callback, Context } from 'aws-lambda';
 import { Handler } from "aws-lambda/handler";
 import {
   context as otelContext,
   defaultTextMapGetter,
   Context as OtelContext,
-  diag,
-  DiagConsoleLogger,
   DiagLogLevel,
   metrics,
   propagation,
@@ -13,7 +18,6 @@ import {
   trace
 } from '@opentelemetry/api';
 import { load } from 'cx-aws-user-function';
-import { getEnv } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { Instrumentation, registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -25,10 +29,6 @@ import { detectResourcesSync, envDetector, processDetector } from '@opentelemetr
 import { MeterProvider, MeterProviderOptions, PeriodicExportingMetricReader, AggregationTemporality } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor, ConsoleSpanExporter, SDKRegistrationConfig, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-
-// configure lambda logging
-const logLevel = getEnv().OTEL_LOG_LEVEL;
-diag.setLogger(new DiagConsoleLogger(), logLevel);
 
 function defaultConfigureInstrumentations() {
   // Use require statements for instrumentation to avoid having to have transitive dependencies on all the typescript
