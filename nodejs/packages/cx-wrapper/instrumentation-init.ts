@@ -1,6 +1,6 @@
 import { diag, Span } from '@opentelemetry/api';
 import { Instrumentation, registerInstrumentations } from '@opentelemetry/instrumentation';
-import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
+import { AwsInstrumentation, NormalizedResponse } from '@opentelemetry/instrumentation-aws-sdk';
 import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 import { OTEL_PAYLOAD_SIZE_LIMIT, OtelAttributes } from './common';
 
@@ -15,6 +15,8 @@ export function initializeInstrumentations(): any[] {
     new AwsInstrumentation({
       suppressInternalInstrumentation: true,
       preRequestHook: (span: Span, { request }) => {
+        diag.debug(`preRequestHook for ${request.serviceName}.${request.commandName}`)
+
         const data = JSON.stringify(request.commandInput);
         if (data !== undefined) {
           span.setAttribute(
@@ -24,15 +26,21 @@ export function initializeInstrumentations(): any[] {
         }
       },
       responseHook: (span, { response }) => {
-        const data =
-          'data' in response && typeof response.data === 'object'
-            ? JSON.stringify(response.data)
-            : response?.data?.toString();
-        if (data !== undefined) {
-          span.setAttribute(
-            OtelAttributes.RPC_RESPONSE_PAYLOAD,
-            data.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
-          );
+        diag.debug(`responseHook for ${response.request.serviceName}.${response.request.commandName}`)
+        if (response.request.serviceName === 'S3') {
+          if ('buckets' in response && Array.isArray(response.buckets)) {
+            setResponsePayloadAttribute(span, JSON.stringify(response.buckets.map(b => b.Name)))
+          } else if ('contents' in response && Array.isArray(response.contents)) {
+            setResponsePayloadAttribute(span, JSON.stringify(response.contents.map(b => b.Key)))
+          } else if ('data' in response && typeof response.data === 'object') {
+            // data is too large and it contains cycles
+          } else {
+            const payload = responseDataToString(response)
+            setResponsePayloadAttribute(span, payload)
+          }
+        } else {
+          const payload = responseDataToString(response)
+          setResponsePayloadAttribute(span, payload)
         }
       },
     }),
@@ -45,6 +53,21 @@ export function initializeInstrumentations(): any[] {
   });
 
   return instrumentations;
+}
+
+function responseDataToString(response: NormalizedResponse): string {
+  return 'data' in response && typeof response.data === 'object'
+    ? JSON.stringify(response.data)
+    : response?.data?.toString();
+}
+
+function setResponsePayloadAttribute(span: Span, payload: string | undefined) {
+  if (payload !== undefined) {
+    span.setAttribute(
+      OtelAttributes.RPC_RESPONSE_PAYLOAD,
+      payload.substring(0, OTEL_PAYLOAD_SIZE_LIMIT)
+    );
+  }
 }
 
 function defaultConfigureInstrumentations() {
