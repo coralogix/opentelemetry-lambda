@@ -24,8 +24,9 @@
   },
   "files": [
     "*.js",
+    "*.mjs",
     "*.d.ts",
-    "*.map",
+    "*.d.mts",
     "package.json"
   ],
   "dependencies": {
@@ -55,7 +56,7 @@
     "@opentelemetry/sdk-metrics": "1.22.0",
     "@opentelemetry/sdk-trace-base": "file:../../../../../oss/opentelemetry-js/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-1.22.0.tgz",
     "@opentelemetry/sdk-trace-node": "1.22.0",
-    "cx-aws-user-function": "file:../cx-aws-user-function/cx-aws-user-function-0.0.1.tgz",
+    "@types/aws-lambda": "^8.10.140",
     "import-in-the-middle": "file:../../../../import-in-the-middle/import-in-the-middle-1.7.3.tgz"
   },
   "overrides": {

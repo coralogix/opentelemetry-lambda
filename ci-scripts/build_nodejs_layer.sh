@@ -99,12 +99,6 @@ rm -f import-in-the-middle-*.tgz
 npm install && npm pack
 popd > /dev/null
 
-# Build cx-aws-user-function
-pushd ./nodejs/packages/cx-aws-user-function
-rm -f cx-aws-user-function-*.tgz
-npm install && npm pack
-popd > /dev/null
-
 # Install forked libraries in cx-wrapper
 pushd ./nodejs/packages/cx-wrapper
 npm install \
@@ -113,8 +107,7 @@ npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
-    ${IITM_PATH}/import-in-the-middle-*.tgz \
-    ${CWD}/nodejs/packages/cx-aws-user-function/cx-aws-user-function-*.tgz
+    ${IITM_PATH}/import-in-the-middle-*.tgz
 popd > /dev/null
 
 # Build cx-wrapper
@@ -123,7 +116,31 @@ rm -f cx-wrapper-*.tgz
 npm install && npm pack
 popd > /dev/null
 
-# Install cx-wrapper in layer
+# Install cx-wrapper in cx-wrapper-16
+pushd ./nodejs/packages/cx-wrapper-16
+npm install \
+    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
+popd > /dev/null
+
+# Build cx-wrapper-16
+pushd ./nodejs/packages/cx-wrapper-16
+rm -f cx-wrapper-*.tgz
+npm install && npm pack
+popd > /dev/null
+
+# Install cx-wrapper in cx-wrapper-18
+pushd ./nodejs/packages/cx-wrapper-18
+npm install \
+    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
+popd > /dev/null
+
+# Build cx-wrapper-18
+pushd ./nodejs/packages/cx-wrapper-18
+rm -f cx-wrapper-*.tgz
+npm install && npm pack
+popd > /dev/null
+
+# Install libraries in layer
 pushd ./nodejs/packages/layer
 npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
@@ -132,8 +149,9 @@ npm install \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
     ${IITM_PATH}/import-in-the-middle-*.tgz \
-    ${CWD}/nodejs/packages/cx-aws-user-function/cx-aws-user-function-*.tgz \
-    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
+    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz \
+    ${CWD}/nodejs/packages/cx-wrapper-16/cx-wrapper-16-*.tgz \
+    ${CWD}/nodejs/packages/cx-wrapper-18/cx-wrapper-18-*.tgz
 popd > /dev/null
 
 # Install copyfiles and bestzip # used by `npm run compile`
