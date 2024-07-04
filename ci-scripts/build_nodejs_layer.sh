@@ -29,8 +29,6 @@ echo OPENTELEMETRY_JS_PATH=$OPENTELEMETRY_JS_PATH
 echo IITM_PATH=$IITM_PATH
 echo CWD=$CWD
 
-npm cache clean --force
-
 pushd $OPENTELEMETRY_JS_CONTRIB_PATH > /dev/null
 # Generate version files in opentelemetry-js-contrib
 npx lerna@6.6.2 run version:update # Newer versions have trouble with our lerna.json which contains `useWorkspaces`
