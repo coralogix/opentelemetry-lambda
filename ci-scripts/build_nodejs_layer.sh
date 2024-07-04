@@ -22,6 +22,13 @@ fi
 
 IITM_PATH=$(realpath $IITM_PATH)
 
+CWD=$(pwd)
+
+echo OPENTELEMETRY_JS_CONTRIB_PATH=$OPENTELEMETRY_JS_CONTRIB_PATH
+echo OPENTELEMETRY_JS_PATH=$OPENTELEMETRY_JS_PATH
+echo IITM_PATH=$IITM_PATH
+echo CWD=$CWD
+
 pushd $OPENTELEMETRY_JS_CONTRIB_PATH > /dev/null
 # Generate version files in opentelemetry-js-contrib
 npx lerna@6.6.2 run version:update # Newer versions have trouble with our lerna.json which contains `useWorkspaces`
@@ -90,8 +97,8 @@ rm -f import-in-the-middle-*.tgz
 npm install && npm pack
 popd > /dev/null
 
-# Install forked opentelemetry-js/opentelemetry-js-contrib libraries
-pushd ./nodejs/packages/layer
+# Install forked libraries in cx-wrapper
+pushd ./nodejs/packages/cx-wrapper
 npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
@@ -101,10 +108,28 @@ npm install \
     ${IITM_PATH}/import-in-the-middle-*.tgz
 popd > /dev/null
 
-# Install copyfiles and bestzip # used by `npm run compile`
-npm install -g copyfiles bestzip
+# Build cx-wrapper
+pushd ./nodejs/packages/cx-wrapper
+rm -f cx-wrapper-*.tgz
+npm install && npm pack
+popd > /dev/null
+
+# Install libraries in layer
+pushd ./nodejs/packages/layer
+npm install \
+    ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
+    ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
+    ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
+    ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
+    ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
+    ${IITM_PATH}/import-in-the-middle-*.tgz \
+    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
+popd > /dev/null
+
+# Install copyfiles and bestzip # used by `npm run clean/compile`
+npm install -g copyfiles bestzip rimraf
 
 # Build layer
 pushd ./nodejs/packages/layer
-npm install && npm run compile
+npm run clean && npm install
 popd > /dev/null

@@ -19,3 +19,4 @@ __pycache__/*
 build.toml
 
 *.zip
+tsconfig.tsbuildinfo
