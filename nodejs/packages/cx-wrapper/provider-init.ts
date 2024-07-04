@@ -10,6 +10,17 @@ import { BatchSpanProcessor, ConsoleSpanExporter, SDKRegistrationConfig, SimpleS
 import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { logLevel, parseIntEnvvar } from './common';
 
+declare global {
+    // in case of downstream configuring span processors etc
+    // function configureTracerProvider(tracerProvider: NodeTracerProvider): void; // TODO restore support for this
+    function configureTracer(defaultConfig: NodeTracerConfig): NodeTracerConfig;
+    function configureSdkRegistration(
+      defaultSdkRegistration: SDKRegistrationConfig
+    ): SDKRegistrationConfig;
+    function configureMeter(defaultConfig: MeterProviderOptions): MeterProviderOptions;
+    function configureMeterProvider(meterProvider: MeterProvider): void
+}
+  
 const DEFAULT_OTEL_EXPORT_TIMEOUT = 2000; // this is a localhost call, and we don't want to block the function for too long
 
 export function initializeProvider(instrumentations: any[]): void {

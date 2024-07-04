@@ -53,8 +53,6 @@
     "@opentelemetry/sdk-trace-base": "file:../../../../../oss/opentelemetry-js/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-1.22.0.tgz",
     "@opentelemetry/sdk-trace-node": "1.22.0",
     "cx-wrapper": "file:../cx-wrapper/cx-wrapper-0.0.1.tgz",
-    "cx-wrapper-16": "file:../cx-wrapper-16/cx-wrapper-16-0.0.1.tgz",
-    "cx-wrapper-18": "file:../cx-wrapper-18/cx-wrapper-18-0.0.1.tgz",
     "import-in-the-middle": "file:../../../../import-in-the-middle/import-in-the-middle-1.7.3.tgz"
   },
   "overrides": {
@@ -63,3 +61,4 @@
     }
   }
 }
+ 

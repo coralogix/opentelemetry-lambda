@@ -1,9 +1,12 @@
 import { diag, Span } from '@opentelemetry/api';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { Instrumentation, registerInstrumentations } from '@opentelemetry/instrumentation';
 import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
 import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 import { OTEL_PAYLOAD_SIZE_LIMIT, OtelAttributes } from './common';
 
+declare global {
+  function configureInstrumentations(): Instrumentation[]
+}
 
 export function initializeInstrumentations(): any[] {
   diag.debug('Initializing OpenTelemetry instrumentations');

@@ -10,6 +10,10 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { AwsLambdaInstrumentation, AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
 import { OTEL_PAYLOAD_SIZE_LIMIT, OtelAttributes } from './common.js';
 
+declare global {
+  function configureLambdaInstrumentation(config: AwsLambdaInstrumentationConfig): AwsLambdaInstrumentationConfig
+}
+
 export function makeLambdaInstrumentation(): AwsLambdaInstrumentation {
   diag.debug('Preparing handler function instrumentation');
 

@@ -116,30 +116,6 @@ rm -f cx-wrapper-*.tgz
 npm install && npm pack
 popd > /dev/null
 
-# Install cx-wrapper in cx-wrapper-16
-pushd ./nodejs/packages/cx-wrapper-16
-npm install \
-    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
-popd > /dev/null
-
-# Build cx-wrapper-16
-pushd ./nodejs/packages/cx-wrapper-16
-rm -f cx-wrapper-*.tgz
-npm install && npm pack
-popd > /dev/null
-
-# Install cx-wrapper in cx-wrapper-18
-pushd ./nodejs/packages/cx-wrapper-18
-npm install \
-    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
-popd > /dev/null
-
-# Build cx-wrapper-18
-pushd ./nodejs/packages/cx-wrapper-18
-rm -f cx-wrapper-*.tgz
-npm install && npm pack
-popd > /dev/null
-
 # Install libraries in layer
 pushd ./nodejs/packages/layer
 npm install \
@@ -149,9 +125,7 @@ npm install \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
     ${IITM_PATH}/import-in-the-middle-*.tgz \
-    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz \
-    ${CWD}/nodejs/packages/cx-wrapper-16/cx-wrapper-16-*.tgz \
-    ${CWD}/nodejs/packages/cx-wrapper-18/cx-wrapper-18-*.tgz
+    ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
 popd > /dev/null
 
 # Install copyfiles and bestzip # used by `npm run compile`
@@ -159,5 +133,5 @@ npm install -g copyfiles bestzip
 
 # Build layer
 pushd ./nodejs/packages/layer
-npm install && npm run compile
+npm run clean && npm install
 popd > /dev/null

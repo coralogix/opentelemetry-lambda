@@ -6,10 +6,10 @@ diag.setLogger(new DiagConsoleLogger(), getEnv().OTEL_LOG_LEVEL);
 
 import { Callback, Context } from 'aws-lambda';
 import { Handler } from "aws-lambda/handler.js";
-import { load } from 'cx-wrapper/loader.js';
-import { initializeInstrumentations } from 'cx-wrapper/instrumentation-init';
-import { initializeProvider } from 'cx-wrapper/provider-init.js';
-import { makeLambdaInstrumentation } from 'cx-wrapper/lambda-instrumentation-init.js';
+import { load } from './loader.js';
+import { initializeInstrumentations } from './instrumentation-init.js';
+import { initializeProvider } from './provider-init.js';
+import { makeLambdaInstrumentation } from './lambda-instrumentation-init.js';
 
 const instrumentations = initializeInstrumentations();
 initializeProvider(instrumentations);
@@ -18,8 +18,19 @@ const lambdaInstrumentation = makeLambdaInstrumentation();
 if (process.env.CX_ORIGINAL_HANDLER === undefined)
   throw Error('CX_ORIGINAL_HANDLER is missing');
 
+// We want user code to get initialized during lambda init phase
+diag.debug(`Initialization: Loading original handler ${process.env.CX_ORIGINAL_HANDLER}`);
+try {
+  (async () => {
+    await load(
+      process.env.LAMBDA_TASK_ROOT,
+      process.env.CX_ORIGINAL_HANDLER
+    );
+  })();
+} catch (e) {}
+
 export const handler = (event: any, context: Context, callback: Callback) => {
-  diag.debug(`Invocation: Loading original handler from ${process.env.CX_ORIGINAL_HANDLER}`);
+  diag.debug(`Loading original handler ${process.env.CX_ORIGINAL_HANDLER}`);
   load(
     process.env.LAMBDA_TASK_ROOT,
     process.env.CX_ORIGINAL_HANDLER
