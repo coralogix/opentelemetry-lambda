@@ -36,23 +36,37 @@ export const handler = (event: any, context: Context, callback: Callback) => {
     process.env.CX_ORIGINAL_HANDLER
   ).then(
     (originalHandler) => {
-      diag.debug(`Instrumenting handler`);
-      const patchedHandler = lambdaInstrumentation.getPatchHandler(originalHandler) as any as Handler;
-      diag.debug(`Running CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`)
-      const maybePromise = patchedHandler(event, context, callback);
-      if (typeof maybePromise?.then === 'function') {
-        maybePromise.then(
-          value => {
-            callback(null, value)
-          },
-          (err: Error | string) => {
-            callback(err, null)
-          }
-        );
+      try {
+        diag.debug(`Instrumenting handler`);
+        const patchedHandler = lambdaInstrumentation.getPatchHandler(originalHandler) as any as Handler;
+        diag.debug(`Running CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`)
+        const maybePromise = patchedHandler(event, context, callback);
+        diag.debug(`patchedHandler returned`);
+        if (typeof maybePromise?.then === 'function') {
+          diag.debug(`maybePromise is a promise`);
+          maybePromise.then(
+            value => {
+              diag.debug(`maybePromise succeeded`);
+              callback(null, value);
+              diag.debug(`callback called`);
+            },
+            (err: Error | string) => {
+              diag.debug(`maybePromise failed`);
+              callback(err, null);
+              diag.debug(`callback called`);
+            }
+          );
+        }
+      } catch (err: any) {
+        diag.debug(`handler failed synchronously`);
+        callback(err, null);
+        diag.debug(`callback called`);
       }
     },
     (err: Error | string) => {
+      diag.debug(`loading function failed`);
       callback(err, null)
+      diag.debug(`callback called`);
     }
   );
 }
