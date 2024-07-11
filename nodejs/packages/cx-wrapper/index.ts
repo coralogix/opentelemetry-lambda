@@ -36,22 +36,35 @@ export const handler = (event: any, context: Context, callback: Callback) => {
     process.env.CX_ORIGINAL_HANDLER
   ).then(
     (originalHandler) => {
-      diag.debug(`Instrumenting handler`);
-      const patchedHandler = lambdaInstrumentation.getPatchHandler(originalHandler) as any as Handler;
-      diag.debug(`Running CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`)
-      const maybePromise = patchedHandler(event, context, callback);
-      if (typeof maybePromise?.then === 'function') {
-        maybePromise.then(
-          value => {
-            callback(null, value)
-          },
-          (err: Error | string) => {
-            callback(err, null)
-          }
-        );
+      try {
+        diag.debug(`Instrumenting handler`);
+        const patchedHandler = lambdaInstrumentation.getPatchHandler(originalHandler) as any as Handler;
+        diag.debug(`Running CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`)
+        const maybePromise = patchedHandler(event, context, callback);
+        if (typeof maybePromise?.then === 'function') {
+          maybePromise.then(
+            value => {
+              context.callbackWaitsForEmptyEventLoop = false;
+              callback(null, value);
+            },
+            (err: Error | string | null | undefined) => {
+              if (err === undefined || err === null) {
+                context.callbackWaitsForEmptyEventLoop = false;
+                callback('handled', null);
+              } else {
+                context.callbackWaitsForEmptyEventLoop = false;
+                callback(err, null);
+              }
+            }
+          );
+        }
+      } catch (err: any) {
+        context.callbackWaitsForEmptyEventLoop = false;
+        callback(err, null);
       }
     },
     (err: Error | string) => {
+      context.callbackWaitsForEmptyEventLoop = false;
       callback(err, null)
     }
   );
