@@ -47,24 +47,35 @@ export const handler = (event: any, context: Context, callback: Callback) => {
           maybePromise.then(
             value => {
               diag.debug(`maybePromise succeeded`);
+              context.callbackWaitsForEmptyEventLoop = false;
               callback(null, value);
               diag.debug(`callback called`);
             },
-            (err: Error | string) => {
-              diag.debug(`maybePromise failed`);
-              callback(err, null);
-              diag.debug(`callback called`);
+            (err: Error | string | null | undefined) => {
+              if (err === undefined || err === null) {
+                diag.debug(`maybePromise failed with no error`);
+                context.callbackWaitsForEmptyEventLoop = false;
+                callback('handled', null);
+                diag.debug(`callback called`);
+              } else {
+                diag.debug(`maybePromise failed`);
+                context.callbackWaitsForEmptyEventLoop = false;
+                callback(err, null);
+                diag.debug(`callback called`);
+              }
             }
           );
         }
       } catch (err: any) {
         diag.debug(`handler failed synchronously`);
+        context.callbackWaitsForEmptyEventLoop = false;
         callback(err, null);
         diag.debug(`callback called`);
       }
     },
     (err: Error | string) => {
       diag.debug(`loading function failed`);
+      context.callbackWaitsForEmptyEventLoop = false;
       callback(err, null)
       diag.debug(`callback called`);
     }
