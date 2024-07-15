@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ github.ref == 'refs/heads/coralogix-python-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
+    env:
+      OPENTELEMETRY_PYTHON_CONTRIB_PATH: ${{ github.workspace }}/opentelemetry-python-contrib
     steps:
     - uses: actions/checkout@v3
     - uses: actions/checkout@v3
@@ -23,30 +25,8 @@ jobs:
         repository: coralogix/opentelemetry-python-contrib
         ref: refs/heads/coralogix-python-dev
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
-    - name: build opentelemetry-instrumentation-aws-lambda
-      working-directory: ./python/sample-apps/otel
-      run: pip3 wheel -e ../../../opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-aws-lambda
-    - name: build opentelemetry-instrumentation-botocore
-      working-directory: ./python/sample-apps/otel
-      run: pip3 wheel -e ../../../opentelemetry-python-contrib/instrumentation/opentelemetry-instrumentation-botocore
-    - name: build layer
-      working-directory: ./python/sample-apps/otel
-      run: |
-        mkdir -p ./build
-        python3 -m pip install -r ./otel_sdk/requirements.txt -t ./build/python
-        python3 -m pip install -r ./otel_sdk/requirements-nodeps.txt -t ./build/tmp --no-deps
-        cp -r ./build/tmp/* ./build/python/
-        rm -rf ./build/tmp
-        cp ./otel_sdk/otel-instrument ./build/otel-instrument
-        chmod 755 ./build/otel-instrument
-        cp ./otel_sdk/otel-instrument ./build/otel-handler
-        chmod 755 ./build/otel-handler
-        cp ./otel_sdk/otel_wrapper.py ./build/python/
-        rm -rf ./build/python/boto*
-        rm -rf ./build/python/urllib3*
-    - name: package layer
-      working-directory: ./python/sample-apps/otel/build
-      run: zip -r layer.zip *
+    - name: Build python layer
+      run: ./ci-script/build_python_layer.sh
     - uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ vars.SIGNER_AWS_ACCESS_KEY_ID }}
