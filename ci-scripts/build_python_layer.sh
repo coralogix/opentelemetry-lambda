@@ -13,8 +13,10 @@ CWD=$(pwd)
 echo OPENTELEMETRY_PYTHON_CONTRIB_PATH=$OPENTELEMETRY_PYTHON_CONTRIB_PATH
 echo CWD=$CWD
 
-# Build build opentelemetry-instrumentation-aws-lambda
+
 pushd ./python/sample-apps/otel
+rm -rf build
+rm -rf *.whl
 pip3 wheel -e $OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation/opentelemetry-instrumentation-aws-lambda
 pip3 wheel -e $OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation/opentelemetry-instrumentation-botocore
 mkdir -p ./build
