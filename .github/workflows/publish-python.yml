@@ -26,7 +26,7 @@ jobs:
         ref: refs/heads/coralogix-python-dev
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_GITHUB_KEY }}
     - name: Build python layer
-      run: ./ci-script/build_python_layer.sh
+      run: ./ci-scripts/build_python_layer.sh
     - uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ vars.SIGNER_AWS_ACCESS_KEY_ID }}
