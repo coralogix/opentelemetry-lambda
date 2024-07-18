@@ -302,6 +302,8 @@ async function initializeProvider() {
     resource,
     readers: [new PeriodicExportingMetricReader({
       exporter: metricExporter,
+      exportIntervalMillis: 315360000000, // 10 years
+      exportTimeoutMillis: 315360000001,
     })]
   }
   if (typeof configureMeter === 'function') {
