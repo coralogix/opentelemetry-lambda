@@ -271,9 +271,14 @@ async function initializeProvider() {
     // defaults
   */
   tracerProvider.addSpanProcessor(
-    new BatchSpanProcessor(new OTLPTraceExporter({
-      timeoutMillis: export_timeout,
-    }))
+    new BatchSpanProcessor(
+      new OTLPTraceExporter({
+        timeoutMillis: export_timeout,
+      }), 
+      {
+        scheduledDelayMillis: 2147483647, // 24 days should be enough to outlive a lambda instance
+      }
+    )
   );
   /*
   }
