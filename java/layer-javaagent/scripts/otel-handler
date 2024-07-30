@@ -40,6 +40,14 @@ if [ -z "$OTEL_PROPAGATORS" ]; then
   export OTEL_PROPAGATORS="tracecontext"
 fi
 
+if [ -z "$OTEL_METRIC_EXPORT_INTERVAL" ]; then
+  export OTEL_METRIC_EXPORT_INTERVAL="2147483647ms"
+fi
+
+if [ -z "$OTEL_BSP_SCHEDULE_DELAY" ]; then
+  export OTEL_BSP_SCHEDULE_DELAY="2147483647ms"
+fi
+
 # shellcheck disable=SC2001 # Fixing the shellcheck warning breaks things
 CMD="$(echo "$@" | sed 's/-Xshare:on/-Xshare:auto/g')"
 
