@@ -51,9 +51,14 @@ export function initializeProvider(instrumentations: any[]): void {
     // defaults
   */
   tracerProvider.addSpanProcessor(
-    new BatchSpanProcessor(new OTLPTraceExporter({
-      timeoutMillis: export_timeout,
-    }))
+    new BatchSpanProcessor(
+      new OTLPTraceExporter({
+        timeoutMillis: export_timeout,
+      }),
+      {
+        scheduledDelayMillis: 2147483647, // 24 days should be enough to outlive a lambda instance
+      }
+    )
   );
   /*
   }
@@ -82,6 +87,7 @@ export function initializeProvider(instrumentations: any[]): void {
     resource,
     readers: [new PeriodicExportingMetricReader({
       exporter: metricExporter,
+      exportIntervalMillis: 2147483647, // 24 days should be enough to outlive a lambda instance
     })]
   }
   if (typeof configureMeter === 'function') {
