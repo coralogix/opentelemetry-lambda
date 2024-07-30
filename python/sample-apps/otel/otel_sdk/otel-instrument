@@ -93,6 +93,16 @@ if [ -z "${OTEL_EXPORTER_OTLP_PROTOCOL}" ]; then
     export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 fi
 
+# Effectively disable priodic export and rely on flushing
+if [ -z "${OTEL_BSP_SCHEDULE_DELAY}" ]; then
+    export OTEL_BSP_SCHEDULE_DELAY=2147483647
+fi
+
+# Effectively disable priodic export and rely on flushing
+if [ -z "${OTEL_METRIC_EXPORT_INTERVAL}" ]; then
+    export OTEL_METRIC_EXPORT_INTERVAL=2147483647
+fi
+
 # - Set the service name
 
 if [ -z ${OTEL_SERVICE_NAME} ]; then
