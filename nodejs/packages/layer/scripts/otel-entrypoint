@@ -1,2 +1,0 @@
-#!/bin/bash
-${BASH_SOURCE%/*}/otel-handler "${BASH_SOURCE%/*}/entrypoint.sh"
