@@ -11,9 +11,37 @@ import { initializeInstrumentations } from './instrumentation-init.js';
 import { initializeProvider } from './provider-init.js';
 import { makeLambdaInstrumentation } from './lambda-instrumentation-init.js';
 
+import v8 from 'v8';
+v8.setFlagsFromString('--trace-gc');
+
 const instrumentations = initializeInstrumentations();
 initializeProvider(instrumentations);
 const lambdaInstrumentation = makeLambdaInstrumentation();
+
+function scheduleTask(interval: number) {
+  let lastExecutionTime = Date.now();
+
+  function checkSchedulingError() {
+      const currentTime = Date.now();
+      const actualDelay = currentTime - lastExecutionTime;
+      const accuracy = actualDelay - interval;
+
+      diag.debug(`Scheduled interval: ${interval}ms, Actual: ${actualDelay}ms, Error: ${accuracy}ms`);
+
+      // Update the last execution time
+      lastExecutionTime = currentTime;
+
+      // Schedule the next check
+      setTimeout(checkSchedulingError, interval);
+  }
+
+  // Start the first check
+  setTimeout(checkSchedulingError, interval);
+}
+
+if (process.env.OTEL_SCHEDULING_ERROR_CHECK?.toLowerCase() === 'true') {
+  scheduleTask(250);
+}
 
 if (process.env.CX_ORIGINAL_HANDLER === undefined)
   throw Error('CX_ORIGINAL_HANDLER is missing');
