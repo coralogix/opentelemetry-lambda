@@ -13,10 +13,6 @@ import { makeLambdaInstrumentation } from './lambda-instrumentation-init.js';
 
 import v8 from 'v8';
 
-import inspector from 'node:inspector'
-import fs from "node:fs";
-import { parseIntEnvvar } from './common.js';
-
 if (process.env.OTEL_TRACE_GC?.toLowerCase() === 'true') {
   console.log("Enabling GC traces");
   v8.setFlagsFromString('--trace-gc');
@@ -27,12 +23,7 @@ initializeProvider(instrumentations);
 const lambdaInstrumentation = makeLambdaInstrumentation();
 
 function scheduleTask(interval: number) {
-  let profilingEnabled = process.env.OTEL_PROFILE?.toLowerCase() === 'true';
-  let profilingThreshold = parseIntEnvvar('OTEL_PROFILING_THRESHOLD') ?? 1000;
-  let profilingTime = parseIntEnvvar('OTEL_PROFILING_TIME') ?? 2500
   let lastExecutionTime = Date.now();
-  let everProfiled = false;
-  const session = new inspector.Session(); 
 
   function checkSchedulingError() {
       const currentTime = Date.now();
@@ -41,49 +32,7 @@ function scheduleTask(interval: number) {
 
       diag.debug(`Scheduled interval: ${interval}ms, Actual: ${actualDelay}ms, Error: ${error}ms`);
       lastExecutionTime = currentTime;
-
-      if (error > profilingThreshold && !everProfiled && profilingEnabled) {
-        startProfiling()
-      } else {
-        setTimeout(checkSchedulingError, interval);
-      }
-
-  }
-
-  function startProfiling() {
-    everProfiled = true;
-    console.log("Staring profiling");
-    session.connect();
-    session.post("Profiler.enable", (err) => {
-      if (err) {
-        console.error(err);
-      } else {
-        session.post("Profiler.start", (err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            setTimeout(endProfiling, profilingTime)
-          }
-        });
-      }
-    });
-  }
-
-  function endProfiling() {
-    console.log("Ending profiling");
-    session.post('Profiler.stop', (err, params) => {
-      if (err) {
-        console.error(err);
-      } else {
-        fs.writeFile("/tmp/profile.log", JSON.stringify(params.profile), (err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            console.log("Finished profiling");
-          }
-        });
-      }
-    });
+      setTimeout(checkSchedulingError, interval);
   }
 
   setTimeout(checkSchedulingError, interval);
