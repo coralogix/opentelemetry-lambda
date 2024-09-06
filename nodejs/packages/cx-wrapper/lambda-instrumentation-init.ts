@@ -1,10 +1,10 @@
 import {
-  context as otelContext,
   defaultTextMapGetter,
   Context as OtelContext,
   propagation,
   trace,
-  diag
+  diag,
+  ROOT_CONTEXT
 } from '@opentelemetry/api';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { AwsLambdaInstrumentation, AwsLambdaInstrumentationConfig } from '@opentelemetry/instrumentation-aws-lambda';
@@ -35,7 +35,7 @@ export function makeLambdaInstrumentation(): AwsLambdaInstrumentation {
       // try to extract propagation from http headers first
       const httpHeaders = event?.headers || {};
       const extractedHttpContext: OtelContext = propagation.extract(
-        otelContext.active(),
+        ROOT_CONTEXT,
         httpHeaders,
         defaultTextMapGetter
       );
@@ -48,7 +48,7 @@ export function makeLambdaInstrumentation(): AwsLambdaInstrumentation {
         try {
           const extractedClientContextOtelContext: OtelContext =
             propagation.extract(
-              otelContext.active(),
+              ROOT_CONTEXT,
               context.clientContext.Custom,
               defaultTextMapGetter
             );
@@ -65,7 +65,7 @@ export function makeLambdaInstrumentation(): AwsLambdaInstrumentation {
         try {
           const extractedClientContextOtelContext: OtelContext =
             propagation.extract(
-              otelContext.active(),
+              ROOT_CONTEXT,
               (context.clientContext as any).custom,
               defaultTextMapGetter
             );
@@ -79,7 +79,7 @@ export function makeLambdaInstrumentation(): AwsLambdaInstrumentation {
           );
         }
       }
-      return otelContext.active();
+      return ROOT_CONTEXT;
     },
     payloadSizeLimit: OTEL_PAYLOAD_SIZE_LIMIT,
   };
