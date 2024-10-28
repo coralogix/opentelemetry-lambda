@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ef -o pipefail
+
 possible_mjs_handler_file="${LAMBDA_TASK_ROOT}/${_HANDLER%.*}.mjs"
 
 # If the handler is in an .mjs file we need to use a loader hook. We can't detect it here because the corresponding env vars are not available at this point

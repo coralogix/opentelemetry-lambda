@@ -17,7 +17,8 @@ var params = {
   }
 };
 
-exports.handler = async (event: APIGatewayProxyEvent, context: Context) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+exports.handler = async (_event: APIGatewayProxyEvent, _context: Context) => {
   console.info('Serving lambda request.');
 
   docClient.put(params, function (err, data) {

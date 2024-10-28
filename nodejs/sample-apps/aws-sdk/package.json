@@ -10,8 +10,7 @@
     "clean": "rimraf build/*",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts",
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts --fix",
-    "precompile": "tsc --version",
-    "prepare": "npm run compile",
+    "build": "npm run clean && npm run compile && npm run postcompile",
     "compile": "tsc -p .",
     "postcompile": "copyfiles 'package*.json' build/src/ && copyfiles 'config.yaml' build/src/ && npm install --production --ignore-scripts --prefix build/src/ && cd build/src && bestzip ../function.zip *"
   },
@@ -36,15 +35,15 @@
     "README.md"
   ],
   "devDependencies": {
-    "@types/aws-lambda": "8.10.134",
-    "@types/node": "20.11.25",
+    "@types/aws-lambda": "8.10.145",
+    "@types/node": "22.6.1",
     "bestzip": "2.2.1",
     "copyfiles": "2.4.1",
-    "rimraf": "5.0.5",
+    "rimraf": "6.0.1",
     "ts-node": "10.9.2",
-    "typescript": "5.3.3"
+    "typescript": "5.6.2"
   },
   "dependencies": {
-    "aws-sdk": "2.1572.0"
+    "aws-sdk": "2.1691.0"
   }
 }

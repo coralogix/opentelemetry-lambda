@@ -36,7 +36,7 @@ var (
 
 func NewFactory() processor.Factory {
 	return processor.NewFactory(
-		typeStr,
+		component.MustNewType(typeStr),
 		createDefaultConfig,
 		processor.WithTraces(createTracesProcessor, stability),
 	)
@@ -46,7 +46,7 @@ func createDefaultConfig() component.Config {
 	return &Config{}
 }
 
-func createTracesProcessor(ctx context.Context, params processor.CreateSettings, rConf component.Config, next consumer.Traces) (processor.Traces, error) {
+func createTracesProcessor(ctx context.Context, params processor.Settings, rConf component.Config, next consumer.Traces) (processor.Traces, error) {
 	cfg, ok := rConf.(*Config)
 	if !ok {
 		return nil, errConfigNotColdstart

@@ -42,9 +42,9 @@ npm install && npm run compile
 popd > /dev/null
 
 # Build opentelemetry-propagator-aws-xray
-pushd $OPENTELEMETRY_JS_CONTRIB_PATH/propagators/opentelemetry-propagator-aws-xray
-npm install && npm run compile
-popd > /dev/null
+# pushd $OPENTELEMETRY_JS_CONTRIB_PATH/propagators/opentelemetry-propagator-aws-xray
+# npm install && npm run compile
+# popd > /dev/null
 
 # Build opentelemetry-propagation-utils
 pushd $OPENTELEMETRY_JS_CONTRIB_PATH/packages/opentelemetry-propagation-utils
@@ -86,10 +86,10 @@ npm install && npm run compile && npm pack
 popd > /dev/null
 
 # Build opentelemetry-sdk-trace-base
-pushd $OPENTELEMETRY_JS_PATH/packages/opentelemetry-sdk-trace-base
-rm -f opentelemetry-sdk-trace-base-*.tgz
-npm install && npm run compile && npm pack
-popd > /dev/null
+# pushd $OPENTELEMETRY_JS_PATH/packages/opentelemetry-sdk-trace-base
+# rm -f opentelemetry-sdk-trace-base-*.tgz
+# npm install && npm run compile && npm pack
+# popd > /dev/null
 
 # Build import-in-the-middle
 pushd $IITM_PATH
@@ -104,7 +104,6 @@ npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
-    ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
     ${IITM_PATH}/import-in-the-middle-*.tgz
 popd > /dev/null
 
@@ -121,7 +120,6 @@ npm install \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
     ${OPENTELEMETRY_JS_CONTRIB_PATH}/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     ${OPENTELEMETRY_JS_PATH}/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
-    ${OPENTELEMETRY_JS_PATH}/packages/opentelemetry-sdk-trace-base/opentelemetry-sdk-trace-base-*.tgz \
     ${IITM_PATH}/import-in-the-middle-*.tgz \
     ${CWD}/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
 popd > /dev/null

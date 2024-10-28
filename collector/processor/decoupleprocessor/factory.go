@@ -36,7 +36,7 @@ var (
 
 func NewFactory() processor.Factory {
 	return processor.NewFactory(
-		typeStr,
+		component.MustNewType(typeStr),
 		createDefaultConfig,
 		processor.WithTraces(createTracesProcessor, stability),
 		processor.WithMetrics(createMetricsProcessor, stability),
@@ -50,7 +50,7 @@ func createDefaultConfig() component.Config {
 	}
 }
 
-func createTracesProcessor(ctx context.Context, params processor.CreateSettings, rConf component.Config, next consumer.Traces) (processor.Traces, error) {
+func createTracesProcessor(ctx context.Context, params processor.Settings, rConf component.Config, next consumer.Traces) (processor.Traces, error) {
 	cfg, ok := rConf.(*Config)
 	if !ok {
 		return nil, errConfigNotDecouple
@@ -71,7 +71,7 @@ func createTracesProcessor(ctx context.Context, params processor.CreateSettings,
 	)
 }
 
-func createMetricsProcessor(ctx context.Context, params processor.CreateSettings, rConf component.Config, next consumer.Metrics) (processor.Metrics, error) {
+func createMetricsProcessor(ctx context.Context, params processor.Settings, rConf component.Config, next consumer.Metrics) (processor.Metrics, error) {
 	cfg, ok := rConf.(*Config)
 	if !ok {
 		return nil, errConfigNotDecouple
@@ -92,7 +92,7 @@ func createMetricsProcessor(ctx context.Context, params processor.CreateSettings
 	)
 }
 
-func createLogsProcessor(ctx context.Context, params processor.CreateSettings, rConf component.Config, next consumer.Logs) (processor.Logs, error) {
+func createLogsProcessor(ctx context.Context, params processor.Settings, rConf component.Config, next consumer.Logs) (processor.Logs, error) {
 	cfg, ok := rConf.(*Config)
 	if !ok {
 		return nil, errConfigNotDecouple

@@ -21,10 +21,10 @@ import fileinput
 import os
 import subprocess
 import sys
-from importlib import import_module
+from importlib import import_module, reload
 from shutil import which
 from unittest import mock
-
+from opentelemetry import propagate
 from opentelemetry.environment_variables import OTEL_PROPAGATORS
 from opentelemetry.instrumentation.aws_lambda import (
     _HANDLER,
@@ -59,7 +59,7 @@ class MockLambdaContext:
 
 MOCK_LAMBDA_CONTEXT = MockLambdaContext(
     aws_request_id="mock_aws_request_id",
-    invoked_function_arn="arn://mock-lambda-function-arn",
+    invoked_function_arn="arn:aws:lambda:us-west-2:123456789012:function:my-function",
 )
 
 MOCK_XRAY_TRACE_ID = 0x5FB7331105E8BB83207FA31D4D9CDB4C
@@ -209,9 +209,13 @@ class TestAwsLambdaInstrumentor(TestBase):
                 **os.environ,
                 # Using Active tracing
                 _X_AMZN_TRACE_ID: MOCK_XRAY_TRACE_CONTEXT_SAMPLED,
+                OTEL_PROPAGATORS: "xray-lambda"
             },
         )
         test_env_patch.start()
+
+        # try to load propagators based on the OTEL_PROPAGATORS env var
+        reload(propagate)
 
         mock_execute_lambda()
 
@@ -227,8 +231,8 @@ class TestAwsLambdaInstrumentor(TestBase):
         self.assertSpanHasAttributes(
             span,
             {
-                ResourceAttributes.FAAS_ID: MOCK_LAMBDA_CONTEXT.invoked_function_arn,
-                SpanAttributes.FAAS_EXECUTION: MOCK_LAMBDA_CONTEXT.aws_request_id,
+                ResourceAttributes.CLOUD_RESOURCE_ID: MOCK_LAMBDA_CONTEXT.invoked_function_arn,
+                SpanAttributes.FAAS_INVOCATION_ID: MOCK_LAMBDA_CONTEXT.aws_request_id,
             },
         )
 
@@ -265,6 +269,9 @@ class TestAwsLambdaInstrumentor(TestBase):
             },
         )
         test_env_patch.start()
+
+        # try to load propagators based on the OTEL_PROPAGATORS env var
+        reload(propagate)
 
         mock_execute_lambda(
             {

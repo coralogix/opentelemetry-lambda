@@ -42,6 +42,7 @@ export function initializeProvider(instrumentations: any[]): void {
   // manually set OTEL_TRACES_EXPORTER to null to error
   // undefined ERROR Exporter "otlp" requested through environment variable is unavailable.
   process.env.OTEL_TRACES_EXPORTER = 'none';
+  process.env.OTEL_EXPORTER_OTLP_COMPRESSION = 'none';
 
   const tracerProvider = new NodeTracerProvider(config);
   /*
