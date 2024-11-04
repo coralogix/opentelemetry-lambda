@@ -1,5 +1,4 @@
-import { diag } from '@opentelemetry/api';
-import { DiagLogLevel, metrics } from '@opentelemetry/api';
+import { diag, metrics } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -8,7 +7,7 @@ import { detectResourcesSync, envDetector, processDetector } from '@opentelemetr
 import { MeterProvider, MeterProviderOptions, PeriodicExportingMetricReader, AggregationTemporality } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor, ConsoleSpanExporter, SDKRegistrationConfig, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { logLevel, parseIntEnvvar } from './common';
+import { parseBooleanEnvvar, parseIntEnvvar } from './common';
 
 declare global {
     // in case of downstream configuring span processors etc
@@ -64,8 +63,8 @@ export function initializeProvider(instrumentations: any[]): void {
   /*
   }
   */
-  // logging for debug
-  if (logLevel === DiagLogLevel.DEBUG) {
+
+  if (parseBooleanEnvvar("OTEL_CONSOLE_SPAN_EXPORTER_ENABLED") ?? false) {
     tracerProvider.addSpanProcessor(
       new SimpleSpanProcessor(new ConsoleSpanExporter())
     );
