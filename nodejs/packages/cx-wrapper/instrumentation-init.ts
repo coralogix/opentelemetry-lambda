@@ -3,6 +3,7 @@ import { Instrumentation, registerInstrumentations } from '@opentelemetry/instru
 import { NormalizedResponse, AwsSdkRequestHookInformation, AwsSdkResponseHookInformation } from '@opentelemetry/instrumentation-aws-sdk';
 import { PgResponseHookInformation } from '@opentelemetry/instrumentation-pg';
 import { OTEL_PAYLOAD_SIZE_LIMIT, OtelAttributes, parseBooleanEnvvar } from './common';
+import { RequestOptions } from 'http';
 
 declare global {
   function configureInstrumentations(): Instrumentation[]
@@ -50,7 +51,10 @@ function defaultConfigureInstrumentations(): Instrumentation[] {
 
   if (parseBooleanEnvvar("OTEL_INSTRUMENTATION_HTTP_ENABLED") ?? defaults) {
     const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-    instrumentations.push(new HttpInstrumentation());
+    instrumentations.push(new HttpInstrumentation({
+      ignoreOutgoingRequestHook: (request: RequestOptions) =>
+        request.hostname === "localhost" && Number(request.port) === 4318,
+    }));
   }
 
   if (parseBooleanEnvvar("OTEL_INSTRUMENTATION_IOREDIS_ENABLED") ?? defaults) {
