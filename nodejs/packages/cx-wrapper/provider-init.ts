@@ -22,7 +22,7 @@ declare global {
   
 const DEFAULT_OTEL_EXPORT_TIMEOUT = 2000; // this is a localhost call, and we don't want to block the function for too long
 
-export function initializeProvider(instrumentations: any[]): void {
+export function initializeProvider(instrumentations: any[]): NodeTracerProvider {
   diag.debug('Initializing OpenTelemetry providers');
 
   const export_timeout = parseIntEnvvar("OTEL_EXPORT_TIMEOUT") ?? DEFAULT_OTEL_EXPORT_TIMEOUT;
@@ -106,4 +106,6 @@ export function initializeProvider(instrumentations: any[]): void {
     tracerProvider,
     meterProvider
   });
+
+  return tracerProvider
 }
