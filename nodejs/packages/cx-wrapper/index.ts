@@ -43,7 +43,8 @@ if (parseBooleanEnvvar("OTEL_WARM_UP_EXPORTER") ?? true) {
         await tracerProvider.forceFlush();
         diag.debug(`Initialization: exporter warmed up`);
       } catch (e) {
-        diag.error(`Initialization: exporter warmup failed: ${e}`);
+        // The export may fail with timeout if the lambda instance gets frozen between init and the first invocation. We don't really care about that failure.
+        // diag.error(`Initialization: exporter warmup failed: ${e}`);
       }
     })();
   } catch (e) {}
