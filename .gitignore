@@ -22,3 +22,10 @@ build.toml
 tsconfig.tsbuildinfo
 
 collector/VERSION
+
+opentelemetry-js/
+opentelemetry-js-contrib-cx/
+import-in-the-middle/
+
+.envrc
+mise.toml
