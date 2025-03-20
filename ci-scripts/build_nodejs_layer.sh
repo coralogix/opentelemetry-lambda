@@ -106,24 +106,24 @@ ls -lah import-in-the-middle-*.tgz
 popd > /dev/null
 
 # Install forked libraries in cx-wrapper
-pushd "./nodejs/packages/cx-wrapper" > /dev/null
+pushd ./nodejs/packages/cx-wrapper
 npm install \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/plugins/node/opentelemetry-instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     "${IITM_PATH}"/import-in-the-middle-*.tgz
-popd > /dev/null
+popd
 
 # Build cx-wrapper
-pushd "./nodejs/packages/cx-wrapper" > /dev/null
+pushd ./nodejs/packages/cx-wrapper
 rm -f cx-wrapper-*.tgz
 npm install && npm pack
 ls -lah cx-wrapper-*.tgz
-popd > /dev/null
+popd
 
 # Install libraries in layer
-pushd "./nodejs/packages/layer" > /dev/null
+pushd ./nodejs/packages/layer
 npm install \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/plugins/node/opentelemetry-instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/plugins/node/opentelemetry-instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
@@ -131,13 +131,13 @@ npm install \
     "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
     "${IITM_PATH}"/import-in-the-middle-*.tgz \
     "${CWD}"/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
-popd > /dev/null
+popd
 
 # Install copyfiles and bestzip # used by `npm run clean/compile`
 npm install -g copyfiles bestzip rimraf
 
 # Build layer
-pushd "./nodejs/packages/layer" > /dev/null
+pushd ./nodejs/packages/layer
 npm run clean && npm install
 ls -lah build/layer.zip
-popd > /dev/null
+popd
