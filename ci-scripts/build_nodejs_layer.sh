@@ -60,21 +60,18 @@ popd > /dev/null
 pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/plugins/node/opentelemetry-instrumentation-aws-lambda" > /dev/null
 rm -f opentelemetry-instrumentation-aws-lambda-*.tgz
 npm install --ignore-scripts && npm run compile && npm pack --ignore-scripts
-ls -lah opentelemetry-instrumentation-aws-lambda-*.tgz
 popd > /dev/null
 
 # Build opentelemetry-instrumentation-mongodb
 pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/plugins/node/opentelemetry-instrumentation-mongodb" > /dev/null
 rm -f opentelemetry-instrumentation-mongodb-*.tgz
 npm install --ignore-scripts && npm run compile && npm pack --ignore-scripts
-ls -lah opentelemetry-instrumentation-mongodb-*.tgz
 popd > /dev/null
 
 # Build opentelemetry-instrumentation-aws-sdk
 pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/plugins/node/opentelemetry-instrumentation-aws-sdk" > /dev/null
 rm -f opentelemetry-instrumentation-aws-sdk-*.tgz
 npm install --ignore-scripts && npm run compile && npm pack --ignore-scripts
-ls -lah opentelemetry-instrumentation-aws-sdk-*.tgz
 popd > /dev/null
 
 # Prepare opentelemetry-js
@@ -104,7 +101,6 @@ popd > /dev/null
 pushd "$IITM_PATH" > /dev/null
 rm -f import-in-the-middle-*.tgz
 npm install && npm pack
-ls -lah import-in-the-middle-*.tgz
 popd > /dev/null
 
 # Install forked libraries in cx-wrapper
@@ -121,7 +117,6 @@ popd > /dev/null
 pushd "./nodejs/packages/cx-wrapper" > /dev/null
 rm -f cx-wrapper-*.tgz
 npm install && npm pack
-ls -lah cx-wrapper-*.tgz
 popd > /dev/null
 
 # Install libraries in layer
