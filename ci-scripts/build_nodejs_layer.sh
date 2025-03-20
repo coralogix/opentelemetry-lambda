@@ -133,4 +133,5 @@ npm install -g copyfiles bestzip rimraf
 # Build layer
 pushd "./nodejs/packages/layer" > /dev/null
 npm run clean && npm install
+ls -lah build/layer.zip
 popd > /dev/null
