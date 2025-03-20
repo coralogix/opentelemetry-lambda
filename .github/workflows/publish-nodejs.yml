@@ -43,7 +43,14 @@ jobs:
       with:
         node-version: 20
     - name: Build
+      continue-on-error: true
       run: ./ci-scripts/build_nodejs_layer.sh
+    - name: Debug
+      uses: lhotari/action-upterm@v1
+      if: always()
+      with:
+        ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+        limit-access-to-actor: true
     - name: Check layer size
       env:
         FILE_PATH: ./nodejs/packages/layer/build/layer.zip
