@@ -16,8 +16,8 @@ jobs:
     if: ${{ github.ref == 'refs/heads/coralogix-nodejs-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
     env:
-      OPENTELEMETRY_JS_CONTRIB_PATH: ${{ github.workspace }}/opentelemetry-js-contrib-cx
-      OPENTELEMETRY_JS_PATH: ${{ github.workspace }}/opentelemetry-js-cx
+      OPENTELEMETRY_JS_CONTRIB_PATH: ${{ github.workspace }}/opentelemetry-js-contrib
+      OPENTELEMETRY_JS_PATH: ${{ github.workspace }}/opentelemetry-js
       IITM_PATH: ${{ github.workspace }}/import-in-the-middle
     steps:
     - uses: actions/checkout@v3
