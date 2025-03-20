@@ -6,7 +6,7 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 JAVA_INSTRUMENTATION_PATH="$ROOT_DIR/../opentelemetry-java-instrumentation"
 
 if [ ! -d "$JAVA_INSTRUMENTATION_PATH" ]; then
-    git clone git@github.com:coralogix/opentelemetry-java-instrumentation.git "$JAVA_INSTRUMENTATION_PATH" -b coralogix-autoinstrumentation -b coralogix-instrumentation
+    git clone git@github.com:coralogix/opentelemetry-java-instrumentation.git "$JAVA_INSTRUMENTATION_PATH" -b coralogix-autoinstrumentation -b coralogix-autoinstrumentation
 fi
 
 echo "Publishing OpenTelemetry Java instrumentation to Maven local"
