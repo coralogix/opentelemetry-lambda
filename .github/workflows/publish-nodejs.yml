@@ -43,7 +43,6 @@ jobs:
       with:
         node-version: 20
     - name: Build
-      continue-on-error: true
       run: ./ci-scripts/build_nodejs_layer.sh
     - name: Check layer size
       env:
