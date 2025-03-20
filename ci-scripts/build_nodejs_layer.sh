@@ -40,9 +40,14 @@ npm install && npm run compile
 popd > /dev/null
 
 # Build opentelemetry-propagator-aws-xray
-# pushd $OPENTELEMETRY_JS_CONTRIB_PATH/propagators/opentelemetry-propagator-aws-xray
-# npm install && npm run compile
-# popd > /dev/null
+pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/propagators/propagator-aws-xray" > /dev/null
+npm install --ignore-scripts && npm run compile
+popd > /dev/null
+
+# Build opentelemetry-propagator-aws-xray-lambda
+pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/propagators/propagator-aws-xray-lambda" > /dev/null
+npm install && npm run compile
+popd > /dev/null
 
 # Build opentelemetry-propagation-utils
 pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/packages/opentelemetry-propagation-utils" > /dev/null
