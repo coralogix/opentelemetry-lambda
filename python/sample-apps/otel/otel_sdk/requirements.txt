@@ -3,3 +3,5 @@ opentelemetry-distro==0.52b0
 file:opentelemetry_instrumentation_aws_lambda-0.52b0-py3-none-any.whl
 file:opentelemetry_instrumentation_botocore-0.52b0-py3-none-any.whl
 setuptools==80.8.0
+# typing_extensions 4.14+ requires Python >=3.9; pin lower to keep Lambda python3.8 compatible
+typing_extensions<4.14

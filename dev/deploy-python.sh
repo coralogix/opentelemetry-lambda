@@ -15,6 +15,7 @@ output=$(aws lambda publish-layer-version \
   --compatible-runtimes python3.8 python3.9 python3.10 python3.11 python3.12 python3.13 \
   --zip-file fileb://python/sample-apps/otel/build/layer.zip \
   --region eu-west-1 \
-  --profile "$AWS_PROFILE")
+  --profile "$AWS_PROFILE" \
+  --output json)
 versionArn=$(echo "$output" | jq -r .LayerVersionArn)
 echo "$versionArn"
