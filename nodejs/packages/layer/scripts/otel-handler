@@ -2,7 +2,40 @@
 
 set -ef -o pipefail
 
-possible_mjs_handler_file="${LAMBDA_TASK_ROOT}/${_HANDLER%.*}.mjs"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+handler_module="${_HANDLER%.*}"
+possible_mjs_handler_file="${LAMBDA_TASK_ROOT}/${handler_module}.mjs"
+
+detect_streaming_handler() {
+  local streaming_metadata
+  streaming_metadata="$(
+    HANDLER_STRING="${CX_ORIGINAL_HANDLER:-$_HANDLER}" \
+      node "${script_dir}/detect-streaming-handler.js" \
+      | grep '^__CX_STREAMING_METADATA__' \
+      | tail -n1 \
+      | sed 's/^__CX_STREAMING_METADATA__//'
+  )" || true
+
+  if [ -n "$streaming_metadata" ]; then
+    export CX_LAMBDA_HANDLER_STREAMING=true
+    local high_water_mark
+    high_water_mark="$(
+      STREAMING_METADATA="$streaming_metadata" node <<'NODE'
+try {
+  const metadata = JSON.parse(process.env.STREAMING_METADATA);
+  if (Number.isInteger(metadata.highWaterMark) && metadata.highWaterMark > 0) {
+    console.log(metadata.highWaterMark);
+  }
+} catch (_) {}
+NODE
+    )"
+    if [ -n "$high_water_mark" ]; then
+      export CX_LAMBDA_HANDLER_STREAMING_HIGH_WATER_MARK="$high_water_mark"
+    fi
+  fi
+}
+
+detect_streaming_handler
 
 # If the handler is in an .mjs file we need to use a loader hook. We can't detect it here because the corresponding env vars are not available at this point
 if [ "$OTEL_NODEJS_HOOK" == "modules" ] || [ -f "$possible_mjs_handler_file" ]; then

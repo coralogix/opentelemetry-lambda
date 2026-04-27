@@ -16,6 +16,15 @@ import { initializeProvider } from './provider-init.js';
 import { makeLambdaInstrumentation } from './lambda-instrumentation-init.js';
 import { parseBooleanEnvvar } from './common.js';
 
+const AWS_HANDLER_STREAMING_SYMBOL = Symbol.for(
+  'aws.lambda.runtime.handler.streaming'
+);
+const AWS_HANDLER_STREAMING_HIGH_WATER_MARK_SYMBOL = Symbol.for(
+  'aws.lambda.runtime.handler.streaming.highWaterMark'
+);
+
+type LambdaHandlerWithMetadata = ((...args: any[]) => any) & Record<symbol, unknown>;
+
 const instrumentations = initializeInstrumentations();
 const tracerProvider = initializeProvider(instrumentations);
 const lambdaInstrumentation = makeLambdaInstrumentation();
@@ -23,14 +32,106 @@ const lambdaInstrumentation = makeLambdaInstrumentation();
 if (process.env.CX_ORIGINAL_HANDLER === undefined)
   throw Error('CX_ORIGINAL_HANDLER is missing');
 
+function isStreamingHandler(handler: Handler): boolean {
+  return (
+    (handler as unknown as LambdaHandlerWithMetadata)[
+      AWS_HANDLER_STREAMING_SYMBOL
+    ] === 'response'
+  );
+}
+
+function syncStreamingMetadata(target: LambdaHandlerWithMetadata, source: Handler) {
+  const sourceWithMetadata = source as unknown as LambdaHandlerWithMetadata;
+  const streamingMode = sourceWithMetadata[AWS_HANDLER_STREAMING_SYMBOL];
+  if (streamingMode === 'response') {
+    target[AWS_HANDLER_STREAMING_SYMBOL] = streamingMode;
+  } else {
+    delete target[AWS_HANDLER_STREAMING_SYMBOL];
+  }
+
+  const highWaterMark =
+    sourceWithMetadata[AWS_HANDLER_STREAMING_HIGH_WATER_MARK_SYMBOL];
+  if (typeof highWaterMark === 'number') {
+    target[AWS_HANDLER_STREAMING_HIGH_WATER_MARK_SYMBOL] = highWaterMark;
+  } else {
+    delete target[AWS_HANDLER_STREAMING_HIGH_WATER_MARK_SYMBOL];
+  }
+}
+
+function syncPreconfiguredStreamingMetadata(target: LambdaHandlerWithMetadata) {
+  if (parseBooleanEnvvar('CX_LAMBDA_HANDLER_STREAMING') !== true) {
+    return;
+  }
+
+  target[AWS_HANDLER_STREAMING_SYMBOL] = 'response';
+
+  const highWaterMark = Number(
+    process.env.CX_LAMBDA_HANDLER_STREAMING_HIGH_WATER_MARK
+  );
+  if (Number.isInteger(highWaterMark) && highWaterMark > 0) {
+    target[AWS_HANDLER_STREAMING_HIGH_WATER_MARK_SYMBOL] = highWaterMark;
+  }
+}
+
+const originalHandlerPromise = load(
+  process.env.LAMBDA_TASK_ROOT,
+  process.env.CX_ORIGINAL_HANDLER
+);
+
+const exportedHandler = (async (...args: any[]) => {
+  const [event, secondArg, thirdArg] = args;
+  const isStreamingInvocation = args.length >= 3 && typeof thirdArg === 'object';
+  const context = (isStreamingInvocation ? thirdArg : secondArg) as Context;
+  const responseStream = isStreamingInvocation ? secondArg : undefined;
+
+  diag.debug(`Loading original handler ${process.env.CX_ORIGINAL_HANDLER}`);
+  try {
+    const originalHandler = await originalHandlerPromise;
+    const originalHandlerIsStreaming = isStreamingHandler(
+      originalHandler as Handler
+    );
+
+    diag.debug(`Instrumenting handler`);
+    const patchedHandler = lambdaInstrumentation.getPatchHandler(
+      originalHandler
+    ) as unknown as Handler;
+    syncStreamingMetadata(exportedHandler, originalHandler as Handler);
+
+    diag.debug(
+      `Running CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`
+    );
+
+    if (originalHandlerIsStreaming) {
+      if (responseStream === undefined) {
+        throw new Error(
+          'Streaming Lambda handler was invoked without a response stream'
+        );
+      }
+
+      return await invokePatchedStreamingHandler(
+        patchedHandler,
+        event,
+        responseStream,
+        context
+      );
+    }
+
+    return await invokePatchedHandler(patchedHandler, event, context);
+  } catch (err) {
+    context.callbackWaitsForEmptyEventLoop = false;
+    diag.error('CX handler failed to execute', err as Error);
+    throw err;
+  }
+}) as LambdaHandlerWithMetadata;
+
+syncPreconfiguredStreamingMetadata(exportedHandler);
+
 // We want user code to get initialized during lambda init phase
 try {
   (async () => {
     diag.debug(`Initialization: Loading original handler ${process.env.CX_ORIGINAL_HANDLER}`);
-    await load(
-      process.env.LAMBDA_TASK_ROOT,
-      process.env.CX_ORIGINAL_HANDLER
-    );
+    const originalHandler = await originalHandlerPromise;
+    syncStreamingMetadata(exportedHandler, originalHandler as Handler);
     diag.debug(`Initialization: Original handler loaded`);
   })();
 } catch (e) {}
@@ -110,27 +211,19 @@ async function invokePatchedHandler(
   });
 }
 
-export const handler = async (event: any, context: Context) => {
-  diag.debug(`Loading original handler ${process.env.CX_ORIGINAL_HANDLER}`);
-  try {
-    const originalHandler = await load(
-      process.env.LAMBDA_TASK_ROOT,
-      process.env.CX_ORIGINAL_HANDLER
-    );
+async function invokePatchedStreamingHandler(
+  patchedHandler: Handler,
+  event: any,
+  responseStream: unknown,
+  context: Context
+) {
+  return (patchedHandler as unknown as LambdaHandlerWithMetadata)(
+    event,
+    responseStream,
+    context
+  );
+}
 
-    diag.debug(`Instrumenting handler`);
-    const patchedHandler = lambdaInstrumentation.getPatchHandler(
-      originalHandler
-    ) as unknown as Handler;
-    diag.debug(
-      `Running CX handler and redirecting to ${process.env.CX_ORIGINAL_HANDLER}`
-    );
-    return await invokePatchedHandler(patchedHandler, event, context);
-  } catch (err) {
-    context.callbackWaitsForEmptyEventLoop = false;
-    diag.error('CX handler failed to execute', err as Error);
-    throw err;
-  }
-};
+export const handler = exportedHandler;
 
 diag.debug('OpenTelemetry instrumentation is ready');
