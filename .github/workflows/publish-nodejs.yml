@@ -13,7 +13,6 @@ jobs:
 
   package:
     runs-on: ubuntu-24.04
-    if: ${{ github.ref == 'refs/heads/coralogix-nodejs-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
     env:
       OPENTELEMETRY_JS_CONTRIB_PATH: ${{ github.workspace }}/opentelemetry-js-contrib
@@ -84,7 +83,6 @@ jobs:
 
   publish-layer:
     runs-on: ubuntu-22.04
-    if: ${{ github.ref == 'refs/heads/coralogix-nodejs-autoinstrumentation' || inputs.environment == 'test' }}
     needs: [package]
     environment: ${{ inputs.environment }}
     steps:
