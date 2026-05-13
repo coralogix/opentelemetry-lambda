@@ -397,7 +397,7 @@ update_test_infra() {
   local layer_arn="$1"
   local file="$TEST_INFRA_DIR/serverless.yml"
   [ -f "$file" ] || die "Missing test infra file: $file"
-  LAYER_ARN="$layer_arn" perl -0pi -e 'my $layer = $ENV{LAYER_ARN}; s{arn:aws:lambda:[^:\n]+:\d+:layer:[A-Za-z0-9._-]+:\d+}{$layer}g; s{\bisrael-coralogix-opentelemetry-nodejs-wrapper-development\b}{$layer}g' "$file"
+  LAYER_ARN="$layer_arn" perl -0pi -e 'my $layer = $ENV{LAYER_ARN}; s{\$\{env:OTEL_WRAPPER_LAYER_ARN,\s*'\''[^'\'']+'\''\}}{\${env:OTEL_WRAPPER_LAYER_ARN, '\''$layer'\''}}g' "$file"
   log "Updated test infra layer reference in $file"
 }
 
