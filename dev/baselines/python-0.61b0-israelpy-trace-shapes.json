@@ -1,0 +1,658 @@
+{
+  "kind": "trace-shape-manifest",
+  "stage": "israelpy",
+  "source_run_dir": "/Users/israel.blancas/projects/opentelemetry-lambda/.build/trace-manifest-0.61",
+  "expected_trace_count": 22,
+  "normalization": {
+    "stage_prefix_template": "python-otel-{stage}-",
+    "operation_rewrites": [
+      {
+        "pattern": "python-otel-\\{stage\\}-Sns-[A-Za-z0-9]+ send",
+        "replacement": "python-otel-{stage}-Sns-* send"
+      },
+      {
+        "pattern": "python-otel-\\{stage\\}-Sqs-[A-Za-z0-9]+",
+        "replacement": "python-otel-{stage}-Sqs-*"
+      },
+      {
+        "pattern": "python-otel-\\{stage\\}-Sns-[A-Za-z0-9]+",
+        "replacement": "python-otel-{stage}-Sns-*"
+      }
+    ]
+  },
+  "expected_shapes": [
+    {
+      "count": 4,
+      "span_count": 3,
+      "services": [
+        "python-otel-{stage}-Sink"
+      ],
+      "operations": [
+        "functions.python.simple.app.lambda_handler",
+        "functions.python.simple.app.lambda_handler",
+        "python-otel-{stage}-Sink init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Sink",
+          "operation_name": "functions.python.simple.app.lambda_handler",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Sink",
+          "functions.python.simple.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sink",
+          "functions.python.simple.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sink",
+          "python-otel-{stage}-Sink init"
+        ]
+      ],
+      "example_trace_id": "0bdf634c05e3c50818876ea243288dd5"
+    },
+    {
+      "count": 3,
+      "span_count": 1,
+      "services": [
+        "python-otel-{stage}-Fail"
+      ],
+      "operations": [
+        "functions.python.fail.app.lambda_handler"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Fail",
+          "operation_name": "functions.python.fail.app.lambda_handler",
+          "status_code": "ERROR",
+          "error": "true"
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Fail",
+          "functions.python.fail.app.lambda_handler"
+        ]
+      ],
+      "example_trace_id": "f55e7fded515e80c174ba79f360971b0"
+    },
+    {
+      "count": 2,
+      "span_count": 2,
+      "services": [
+        "python-otel-{stage}-Sink"
+      ],
+      "operations": [
+        "functions.python.simple.app.lambda_handler",
+        "functions.python.simple.app.lambda_handler"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Sink",
+          "operation_name": "functions.python.simple.app.lambda_handler",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Sink",
+          "functions.python.simple.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sink",
+          "functions.python.simple.app.lambda_handler"
+        ]
+      ],
+      "example_trace_id": "5e7700c592f7b8852fdf02a9246eba9f"
+    },
+    {
+      "count": 1,
+      "span_count": 2,
+      "services": [
+        "python-otel-{stage}-CustomMetrics"
+      ],
+      "operations": [
+        "functions.python.custom_metrics.app.lambda_handler",
+        "python-otel-{stage}-CustomMetrics init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-CustomMetrics",
+          "operation_name": "functions.python.custom_metrics.app.lambda_handler",
+          "status_code": null,
+          "error": null
+        },
+        {
+          "service_name": "python-otel-{stage}-CustomMetrics",
+          "operation_name": "python-otel-{stage}-CustomMetrics init",
+          "status_code": "OK",
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-CustomMetrics",
+          "functions.python.custom_metrics.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-CustomMetrics",
+          "python-otel-{stage}-CustomMetrics init"
+        ]
+      ],
+      "example_trace_id": "609704eec8477b1cb8132d552a6d5f57"
+    },
+    {
+      "count": 1,
+      "span_count": 12,
+      "services": [
+        "python-otel-{stage}-Fail",
+        "python-otel-{stage}-Sample"
+      ],
+      "operations": [
+        "/",
+        "DynamoDB.GetItem",
+        "Lambda.Invoke",
+        "S3.GetObject",
+        "S3.PutObject",
+        "SFN.StartExecution",
+        "SQS.SendMessage",
+        "functions.python.fail.app.lambda_handler",
+        "functions.python.sample.app.lambda_handler",
+        "python-otel-{stage}-Fail init",
+        "python-otel-{stage}-Sample init",
+        "python-otel-{stage}-Sns-* send"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Sample",
+          "operation_name": "/",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Fail",
+          "functions.python.fail.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Fail",
+          "python-otel-{stage}-Fail init"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "/"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "DynamoDB.GetItem"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "Lambda.Invoke"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "S3.GetObject"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "S3.PutObject"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "SFN.StartExecution"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "SQS.SendMessage"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "functions.python.sample.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "python-otel-{stage}-Sample init"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "python-otel-{stage}-Sns-* send"
+        ]
+      ],
+      "example_trace_id": "138f3ca558aae198769edaf63399a275"
+    },
+    {
+      "count": 1,
+      "span_count": 2,
+      "services": [
+        "python-otel-{stage}-Fail"
+      ],
+      "operations": [
+        "functions.python.fail.app.lambda_handler",
+        "python-otel-{stage}-Fail init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Fail",
+          "operation_name": "functions.python.fail.app.lambda_handler",
+          "status_code": "ERROR",
+          "error": "true"
+        },
+        {
+          "service_name": "python-otel-{stage}-Fail",
+          "operation_name": "python-otel-{stage}-Fail init",
+          "status_code": "OK",
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Fail",
+          "functions.python.fail.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Fail",
+          "python-otel-{stage}-Fail init"
+        ]
+      ],
+      "example_trace_id": "d1e923cc356573a63021445e68549791"
+    },
+    {
+      "count": 1,
+      "span_count": 10,
+      "services": [
+        "python-otel-{stage}-Fail",
+        "python-otel-{stage}-Sample"
+      ],
+      "operations": [
+        "/",
+        "DynamoDB.GetItem",
+        "Lambda.Invoke",
+        "S3.GetObject",
+        "S3.PutObject",
+        "SFN.StartExecution",
+        "SQS.SendMessage",
+        "functions.python.fail.app.lambda_handler",
+        "functions.python.sample.app.lambda_handler",
+        "python-otel-{stage}-Sns-* send"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Sample",
+          "operation_name": "/",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Fail",
+          "functions.python.fail.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "/"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "DynamoDB.GetItem"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "Lambda.Invoke"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "S3.GetObject"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "S3.PutObject"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "SFN.StartExecution"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "SQS.SendMessage"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "functions.python.sample.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "python-otel-{stage}-Sns-* send"
+        ]
+      ],
+      "example_trace_id": "8a97aa7a3cc51f0ec1088e3dd0bbc86e"
+    },
+    {
+      "count": 1,
+      "span_count": 9,
+      "services": [
+        "python-otel-{stage}-Fail",
+        "python-otel-{stage}-Sample"
+      ],
+      "operations": [
+        "DynamoDB.GetItem",
+        "Lambda.Invoke",
+        "S3.GetObject",
+        "S3.PutObject",
+        "SFN.StartExecution",
+        "SQS.SendMessage",
+        "functions.python.fail.app.lambda_handler",
+        "functions.python.sample.app.lambda_handler",
+        "python-otel-{stage}-Sns-* send"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Sample",
+          "operation_name": "functions.python.sample.app.lambda_handler",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Fail",
+          "functions.python.fail.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "DynamoDB.GetItem"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "Lambda.Invoke"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "S3.GetObject"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "S3.PutObject"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "SFN.StartExecution"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "SQS.SendMessage"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "functions.python.sample.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Sample",
+          "python-otel-{stage}-Sns-* send"
+        ]
+      ],
+      "example_trace_id": "34330af6ecd409c7d9a593d7c284612e"
+    },
+    {
+      "count": 1,
+      "span_count": 2,
+      "services": [
+        "python-otel-{stage}-FailInit"
+      ],
+      "operations": [
+        "python-otel-{stage}-FailInit init",
+        "python-otel-{stage}-FailInit init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-FailInit",
+          "operation_name": "python-otel-{stage}-FailInit init",
+          "status_code": "ERROR",
+          "error": "true"
+        },
+        {
+          "service_name": "python-otel-{stage}-FailInit",
+          "operation_name": "python-otel-{stage}-FailInit init",
+          "status_code": "ERROR",
+          "error": "true"
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-FailInit",
+          "python-otel-{stage}-FailInit init"
+        ],
+        [
+          "python-otel-{stage}-FailInit",
+          "python-otel-{stage}-FailInit init"
+        ]
+      ],
+      "example_trace_id": "8e5ad105ef903c5c2466ba707afa4ae4"
+    },
+    {
+      "count": 1,
+      "span_count": 2,
+      "services": [
+        "python-otel-{stage}-Oom"
+      ],
+      "operations": [
+        "functions.python.oom.app.lambda_handler",
+        "python-otel-{stage}-Oom init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Oom",
+          "operation_name": "functions.python.oom.app.lambda_handler",
+          "status_code": "ERROR",
+          "error": "true"
+        },
+        {
+          "service_name": "python-otel-{stage}-Oom",
+          "operation_name": "python-otel-{stage}-Oom init",
+          "status_code": "OK",
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Oom",
+          "functions.python.oom.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Oom",
+          "python-otel-{stage}-Oom init"
+        ]
+      ],
+      "example_trace_id": "bb46d777879d37ad7cabc545faecf89c"
+    },
+    {
+      "count": 1,
+      "span_count": 1,
+      "services": [
+        "python-otel-{stage}-Sink"
+      ],
+      "operations": [
+        "functions.python.simple.app.lambda_handler"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Sink",
+          "operation_name": "functions.python.simple.app.lambda_handler",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Sink",
+          "functions.python.simple.app.lambda_handler"
+        ]
+      ],
+      "example_trace_id": "40b50dfbecde91b07e71b762b0d56ff0"
+    },
+    {
+      "count": 1,
+      "span_count": 1,
+      "services": [
+        "python-otel-{stage}-SqsProducer"
+      ],
+      "operations": [
+        "python-otel-{stage}-SqsProducer init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-SqsProducer",
+          "operation_name": "python-otel-{stage}-SqsProducer init",
+          "status_code": "OK",
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-SqsProducer",
+          "python-otel-{stage}-SqsProducer init"
+        ]
+      ],
+      "example_trace_id": "6a0d63c3202bfb1934255610350ad84d"
+    },
+    {
+      "count": 1,
+      "span_count": 3,
+      "services": [
+        "python-otel-{stage}-Timeout"
+      ],
+      "operations": [
+        "/Timeout",
+        "functions.python.timeout.app.lambda_handler",
+        "python-otel-{stage}-Timeout init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Timeout",
+          "operation_name": "/Timeout",
+          "status_code": "ERROR",
+          "error": "true"
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Timeout",
+          "/Timeout"
+        ],
+        [
+          "python-otel-{stage}-Timeout",
+          "functions.python.timeout.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Timeout",
+          "python-otel-{stage}-Timeout init"
+        ]
+      ],
+      "example_trace_id": "5862bb15619619836332e110c4c25721"
+    },
+    {
+      "count": 1,
+      "span_count": 2,
+      "services": [
+        "python-otel-{stage}-Timeout"
+      ],
+      "operations": [
+        "functions.python.timeout.app.lambda_handler",
+        "python-otel-{stage}-Timeout init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-Timeout",
+          "operation_name": "functions.python.timeout.app.lambda_handler",
+          "status_code": "ERROR",
+          "error": "true"
+        },
+        {
+          "service_name": "python-otel-{stage}-Timeout",
+          "operation_name": "python-otel-{stage}-Timeout init",
+          "status_code": "OK",
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-Timeout",
+          "functions.python.timeout.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-Timeout",
+          "python-otel-{stage}-Timeout init"
+        ]
+      ],
+      "example_trace_id": "a8e5556f52b4e24fc0d475f153d5378e"
+    },
+    {
+      "count": 1,
+      "span_count": 3,
+      "services": [
+        "python-otel-{stage}-TracekitTest"
+      ],
+      "operations": [
+        "/tracekit-test",
+        "functions.python.tracekit_test.app.lambda_handler",
+        "python-otel-{stage}-TracekitTest init"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-TracekitTest",
+          "operation_name": "/tracekit-test",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-TracekitTest",
+          "/tracekit-test"
+        ],
+        [
+          "python-otel-{stage}-TracekitTest",
+          "functions.python.tracekit_test.app.lambda_handler"
+        ],
+        [
+          "python-otel-{stage}-TracekitTest",
+          "python-otel-{stage}-TracekitTest init"
+        ]
+      ],
+      "example_trace_id": "f9728e13826d73309927059b48ca83df"
+    },
+    {
+      "count": 1,
+      "span_count": 1,
+      "services": [
+        "python-otel-{stage}-TracekitTest"
+      ],
+      "operations": [
+        "functions.python.tracekit_test.app.lambda_handler"
+      ],
+      "root_spans": [
+        {
+          "service_name": "python-otel-{stage}-TracekitTest",
+          "operation_name": "functions.python.tracekit_test.app.lambda_handler",
+          "status_code": null,
+          "error": null
+        }
+      ],
+      "shape": [
+        [
+          "python-otel-{stage}-TracekitTest",
+          "functions.python.tracekit_test.app.lambda_handler"
+        ]
+      ],
+      "example_trace_id": "3b8202cb837cd4e80eccbbd9fd649629"
+    }
+  ]
+}
