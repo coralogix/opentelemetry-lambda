@@ -30,6 +30,7 @@ if [ ! -d "$OPENTELEMETRY_JS_PATH" ]; then
 fi
 
 "$ROOT_DIR/ci-scripts/build_nodejs_layer.sh"
+"$ROOT_DIR/ci-scripts/check_nodejs_fips_compat.sh"
 
 # Useful for using the layer locally
 pushd "$ROOT_DIR/nodejs/packages/layer" >/dev/null
