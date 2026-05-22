@@ -58,6 +58,30 @@ log() {
     echo "$padding $message $padding"
 }
 
+patch_protobuf_fips_hash_usage() {
+    local build_python_path="$1"
+    local proto_builder_path="$build_python_path/google/protobuf/proto_builder.py"
+
+    if [ ! -f "$proto_builder_path" ]; then
+        return
+    fi
+
+    python3 - "$proto_builder_path" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+needle = "  fields_hash = hashlib.sha1()\n"
+replacement = """  try:\n    fields_hash = hashlib.sha1(usedforsecurity=False)\n  except TypeError:\n    fields_hash = hashlib.sha1()\n"""
+
+text = path.read_text()
+if needle not in text:
+    raise SystemExit(0)
+
+path.write_text(text.replace(needle, replacement, 1))
+PY
+}
+
 
 
 if [ -z "${OPENTELEMETRY_PYTHON_CONTRIB_PATH:-}" ]; then
@@ -68,8 +92,18 @@ fi
 OPENTELEMETRY_PYTHON_CONTRIB_PATH=$(realpath "$OPENTELEMETRY_PYTHON_CONTRIB_PATH")
 CWD=$(pwd)
 
-AWS_LAMBDA_INSTRUMENTATION_PATH=$OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation/opentelemetry-instrumentation-aws-lambda
-BOTOCORE_INSTRUMENTATION_PATH=$OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation/opentelemetry-instrumentation-botocore
+WORKSPACE_CONTRIB_COPY_PATH="$CWD/.build/opentelemetry-python-contrib"
+rm -rf "$WORKSPACE_CONTRIB_COPY_PATH"
+mkdir -p "$WORKSPACE_CONTRIB_COPY_PATH/instrumentation"
+find "$OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation" \
+    \( -name '*.bak' -o -name 'sed*' \) -type f -size 0 -delete
+cp -R "$OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation/opentelemetry-instrumentation-aws-lambda" \
+    "$WORKSPACE_CONTRIB_COPY_PATH/instrumentation/"
+cp -R "$OPENTELEMETRY_PYTHON_CONTRIB_PATH/instrumentation/opentelemetry-instrumentation-botocore" \
+    "$WORKSPACE_CONTRIB_COPY_PATH/instrumentation/"
+
+AWS_LAMBDA_INSTRUMENTATION_PATH=$WORKSPACE_CONTRIB_COPY_PATH/instrumentation/opentelemetry-instrumentation-aws-lambda
+BOTOCORE_INSTRUMENTATION_PATH=$WORKSPACE_CONTRIB_COPY_PATH/instrumentation/opentelemetry-instrumentation-botocore
 
 log "Environment Variables"
 echo "OPENTELEMETRY_PYTHON_CONTRIB_PATH=$OPENTELEMETRY_PYTHON_CONTRIB_PATH"
@@ -107,6 +141,9 @@ chmod 755 ./build/otel-handler
 cp ./otel_sdk/otel_wrapper.py ./build/python/
 cp ./otel_sdk/pip.conf ./build/python/
 cp ./otel_sdk/constraints.txt ./build/python/
+
+log "Applying FIPS compatibility patches"
+patch_protobuf_fips_hash_usage ./build/python
 
 log "Cleaning up boto and urllib3"
 rm -rf ./build/python/boto*
