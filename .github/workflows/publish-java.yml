@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: temurin
-        java-version: 17
+        java-version: 21
     - uses: actions/checkout@v3
       with:
         path: ./opentelemetry-java-instrumentation
@@ -32,10 +32,10 @@ jobs:
         arguments: publishToMavenLocal
         build-root-directory: opentelemetry-java-instrumentation
     - name: Build Javaagent Layer
-      uses: gradle/gradle-build-action@v2
-      with:
-        arguments: :layer-javaagent:assemble
-        build-root-directory: java
+      working-directory: java
+      env:
+        GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-java-layer
+      run: ./gradlew :layer-javaagent:assemble
     - name: Check layer size
       env:
         FILE_PATH: ./java/layer-javaagent/build/distributions/opentelemetry-javaagent-layer.zip
