@@ -285,7 +285,6 @@ scan_targets() {
 
 check_java_fips_compat() {
     local tmp_dir
-    local previous_trap
 
     echo "Running Java FIPS compatibility check"
 
@@ -305,18 +304,17 @@ check_java_fips_compat() {
     fi
 
     tmp_dir=$(mktemp -d)
-    previous_trap=$(trap -p EXIT || true)
-    trap "rm -rf '$tmp_dir'" EXIT
-
-    unzip -q "$LAYER_ZIP" -d "$tmp_dir"
-    scan_targets "packaged java layer" "$tmp_dir"
-    rm -rf "$tmp_dir"
-
-    if [ -n "$previous_trap" ]; then
-        eval "$previous_trap"
-    else
-        trap - EXIT
+    if ! unzip -q "$LAYER_ZIP" -d "$tmp_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
     fi
+
+    if ! scan_targets "packaged java layer" "$tmp_dir"; then
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir"
 
     echo "Java FIPS compatibility check passed"
 }
