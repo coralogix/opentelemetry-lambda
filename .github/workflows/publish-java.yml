@@ -13,7 +13,6 @@ jobs:
 
   package:
     runs-on: public-runner
-    if: ${{ github.ref == 'refs/heads/coralogix-java-autoinstrumentation' || inputs.environment == 'test' }}
     environment: ${{ inputs.environment }}
     steps:
     - uses: actions/checkout@v3
@@ -77,7 +76,6 @@ jobs:
 
   publish-layer:
     runs-on: ubuntu-22.04
-    if: ${{ github.ref == 'refs/heads/coralogix-java-autoinstrumentation' || inputs.environment == 'test' }}
     needs: [package]
     environment: ${{ inputs.environment }}
     steps:
