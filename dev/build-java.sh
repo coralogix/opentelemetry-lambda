@@ -326,7 +326,7 @@ fi
 echo "Publishing OpenTelemetry Java instrumentation to Maven local"
 apply_java_fips_patch
 pushd "$JAVA_INSTRUMENTATION_PATH"
-./gradlew publishToMavenLocal
+./gradlew publishToMavenLocal :javaagent:lambdaMinimalJavaagentJar
 popd
 
 echo "Building Java agent layer"
