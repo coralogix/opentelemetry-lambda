@@ -73,7 +73,7 @@ function resolveDependency(fromFile, specifier) {
 }
 
 function stripCommentsAndStrings(source) {
-  let output = '';
+  const output = new Array(source.length);
   let index = 0;
 
   while (index < source.length) {
@@ -82,54 +82,57 @@ function stripCommentsAndStrings(source) {
 
     if (char === '/' && next === '/') {
       while (index < source.length && source[index] !== '\n') {
-        output += ' ';
+        output[index] = ' ';
         index++;
       }
       continue;
     }
 
     if (char === '/' && next === '*') {
-      output += '  ';
+      output[index] = ' ';
+      output[index + 1] = ' ';
       index += 2;
       while (
         index < source.length &&
         !(source[index] === '*' && source[index + 1] === '/')
       ) {
-        output += source[index] === '\n' ? '\n' : ' ';
+        output[index] = source[index] === '\n' ? '\n' : ' ';
         index++;
       }
       if (index < source.length) {
-        output += '  ';
+        output[index] = ' ';
+        output[index + 1] = ' ';
         index += 2;
       }
       continue;
     }
 
     if (char === '\'' || char === '"' || char === '`') {
-      output += ' ';
+      output[index] = ' ';
       index++;
       while (index < source.length) {
         if (source[index] === '\\') {
-          output += '  ';
+          output[index] = ' ';
+          output[index + 1] = ' ';
           index += 2;
           continue;
         }
         if (source[index] === char) {
-          output += ' ';
+          output[index] = ' ';
           index++;
           break;
         }
-        output += source[index] === '\n' ? '\n' : ' ';
+        output[index] = source[index] === '\n' ? '\n' : ' ';
         index++;
       }
       continue;
     }
 
-    output += char;
+    output[index] = char;
     index++;
   }
 
-  return output;
+  return output.join('');
 }
 
 function findMatchingDelimiter(source, start, open, close) {
