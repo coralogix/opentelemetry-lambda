@@ -80,5 +80,5 @@ jobs:
     - name: Publish layer
       env:
         LAYER_NAME: "coralogix-opentelemetry-python-wrapper"
-        COMPATIBLE_RUNTIMES: "python3.9 python3.10 python3.11 python3.12 python3.13 python3.14"
+        COMPATIBLE_RUNTIMES: "python3.10 python3.11 python3.12 python3.13 python3.14"
       run: ./ci-scripts/publish_${{ inputs.environment }}.sh
