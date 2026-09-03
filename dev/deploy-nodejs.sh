@@ -23,7 +23,7 @@ fi
 output=$(aws lambda publish-layer-version \
   --layer-name "$LAMBDA_LAYER_PREFIX-coralogix-opentelemetry-nodejs-wrapper-development" \
   --compatible-architectures x86_64 arm64 \
-  --compatible-runtimes nodejs18.x nodejs20.x nodejs22.x nodejs24.x \
+  --compatible-runtimes nodejs22.x nodejs24.x nodejs26.x \
   --zip-file fileb://nodejs/packages/layer/build/layer.zip \
   --region eu-west-1 \
   --profile "$AWS_PROFILE" \
