@@ -46,11 +46,6 @@ pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/packages/propagator-aws-xray-lambda" > /de
 npm install && npm run compile
 popd > /dev/null
 
-# Build propagation-utils
-pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/packages/propagation-utils" > /dev/null
-npm install && npm run compile
-popd > /dev/null
-
 # Build opentelemetry-instrumentation-aws-lambda
 pushd "$OPENTELEMETRY_JS_CONTRIB_PATH/packages/instrumentation-aws-lambda" > /dev/null
 rm -f opentelemetry-instrumentation-aws-lambda-*.tgz
