@@ -40,7 +40,7 @@ jobs:
         ssh-key: ${{ secrets.OPENTELEMETRY_CI_IITM_GITHUB_KEY }}
     - uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 26
     - name: Build
       run: ./ci-scripts/build_nodejs_layer.sh
     - name: Check layer size
@@ -102,5 +102,5 @@ jobs:
     - name: Publish layer
       env:
         LAYER_NAME: "coralogix-opentelemetry-nodejs-wrapper"
-        COMPATIBLE_RUNTIMES: "nodejs18.x nodejs20.x nodejs22.x nodejs24.x"
+        COMPATIBLE_RUNTIMES: "nodejs22.x nodejs24.x nodejs26.x"
       run: ./ci-scripts/publish_${{ inputs.environment }}.sh

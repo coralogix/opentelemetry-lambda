@@ -72,7 +72,7 @@ npx nx run-many -t version
 popd > /dev/null
 
 # Build sdk-logs
-pushd "$OPENTELEMETRY_JS_PATH/experimental/packages/sdk-logs" > /dev/null
+pushd "$OPENTELEMETRY_JS_PATH/packages/sdk-logs" > /dev/null
 npm install && npm run compile
 popd > /dev/null
 
