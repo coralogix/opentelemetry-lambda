@@ -21,7 +21,16 @@ echo "OPENTELEMETRY_JS_CONTRIB_PATH=$OPENTELEMETRY_JS_CONTRIB_PATH"
 echo "OPENTELEMETRY_JS_PATH=$OPENTELEMETRY_JS_PATH"
 echo "CWD=$CWD"
 
-npm cache clean --force
+# Explicit local archive arguments refresh same-version tarball integrity while
+# keeping the portable file: references declared in each package manifest.
+install_file_dependencies() {
+    local -a archives=()
+    local archive
+    while IFS= read -r archive; do
+        archives+=("$archive")
+    done < <(node -e 'for (const dep of Object.values(require("./package.json").dependencies)) if (dep.startsWith("file:")) console.log(dep)')
+    npm install "$@" "${archives[@]}"
+}
 
 pushd "$OPENTELEMETRY_JS_CONTRIB_PATH" > /dev/null
 # Prepare opentelemetry-js-contrib
@@ -72,7 +81,7 @@ npx nx run-many -t version
 popd > /dev/null
 
 # Build sdk-logs
-pushd "$OPENTELEMETRY_JS_PATH/experimental/packages/sdk-logs" > /dev/null
+pushd "$OPENTELEMETRY_JS_PATH/packages/sdk-logs" > /dev/null
 npm install && npm run compile
 popd > /dev/null
 
@@ -83,43 +92,22 @@ npm install && npm run compile && npm pack
 ls -lah opentelemetry-instrumentation-*.tgz
 popd > /dev/null
 
-# Build opentelemetry-sdk-trace-base
-# pushd $OPENTELEMETRY_JS_PATH/packages/opentelemetry-sdk-trace-base
-# rm -f opentelemetry-sdk-trace-base-*.tgz
-# npm install && npm run compile && npm pack
-# popd > /dev/null
-
-# Install forked libraries in cx-wrapper
-pushd "./nodejs/packages/cx-wrapper" > /dev/null
-npm install \
-    "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
-    "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
-    "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
-    "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz
-popd > /dev/null
-
 # Build cx-wrapper
 pushd "./nodejs/packages/cx-wrapper" > /dev/null
 rm -f cx-wrapper-*.tgz
-npm install && npm pack
+install_file_dependencies && npm pack
 popd > /dev/null
 
-# Install libraries in layer
-pushd "./nodejs/packages/layer" > /dev/null
-npm install \
-    "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
-    "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
-    "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
-    "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
-    "${CWD}"/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
-popd > /dev/null
-
-# Install copyfiles and bestzip # used by `npm run clean/compile`
-npm install -g copyfiles bestzip rimraf
+# Keep packaging tools local to this build instead of modifying global tools.
+BUILD_TOOLS_DIR=$(mktemp -d)
+trap 'rm -rf "$BUILD_TOOLS_DIR"' EXIT
+npm install --prefix "$BUILD_TOOLS_DIR" --ignore-scripts --no-audit --no-fund \
+    copyfiles@2.4.1 bestzip@2.2.1 rimraf@6.1.3
+export PATH="$BUILD_TOOLS_DIR/node_modules/.bin:$PATH"
 
 # Build layer
 pushd "./nodejs/packages/layer" > /dev/null
-npm run clean && npm install --production
+npm run clean && install_file_dependencies --omit=dev
 # Dedupe dependencies to remove duplicates and reduce size
 npm dedupe
 # Remove unnecessary files to reduce layer size
