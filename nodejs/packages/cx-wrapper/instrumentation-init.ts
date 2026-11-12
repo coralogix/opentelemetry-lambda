@@ -52,6 +52,8 @@ function defaultConfigureInstrumentations(): Instrumentation[] {
   if (parseBooleanEnvvar("OTEL_INSTRUMENTATION_HTTP_ENABLED") ?? defaults) {
     const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
     instrumentations.push(new HttpInstrumentation({
+      // Preserve the response-span semantics of existing Coralogix layers.
+      emitResponseStatusErrorType: false,
       ignoreOutgoingRequestHook: (request: RequestOptions) =>
         request.hostname === "localhost" && Number(request.port) === 4318,
     }));
