@@ -83,6 +83,15 @@ npm install && npm run compile && npm pack
 ls -lah opentelemetry-instrumentation-*.tgz
 popd > /dev/null
 
+# Build the forked HTTP instrumentation used by cx-wrapper.
+pushd "$OPENTELEMETRY_JS_PATH" > /dev/null
+npx nx run @opentelemetry/instrumentation-http:compile
+popd > /dev/null
+pushd "$OPENTELEMETRY_JS_PATH/experimental/packages/opentelemetry-instrumentation-http" > /dev/null
+rm -f opentelemetry-instrumentation-http-*.tgz
+npm pack --ignore-scripts
+popd > /dev/null
+
 # Build opentelemetry-sdk-trace-base
 # pushd $OPENTELEMETRY_JS_PATH/packages/opentelemetry-sdk-trace-base
 # rm -f opentelemetry-sdk-trace-base-*.tgz
@@ -95,7 +104,8 @@ npm install \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-lambda/opentelemetry-instrumentation-aws-lambda-*.tgz \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
-    "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz
+    "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
+    "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation-http/opentelemetry-instrumentation-http-*.tgz
 popd > /dev/null
 
 # Build cx-wrapper
@@ -111,6 +121,7 @@ npm install \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-mongodb/opentelemetry-instrumentation-mongodb-*.tgz \
     "${OPENTELEMETRY_JS_CONTRIB_PATH}"/packages/instrumentation-aws-sdk/opentelemetry-instrumentation-aws-sdk-*.tgz \
     "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation/opentelemetry-instrumentation-*.tgz \
+    "${OPENTELEMETRY_JS_PATH}"/experimental/packages/opentelemetry-instrumentation-http/opentelemetry-instrumentation-http-*.tgz \
     "${CWD}"/nodejs/packages/cx-wrapper/cx-wrapper-*.tgz
 popd > /dev/null
 
